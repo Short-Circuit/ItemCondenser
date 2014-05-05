@@ -1,0 +1,189 @@
+name: ItemCondenser
+version: 2.9
+author: ShortCircuit908
+website: http://dev.bukkit.org/bukkit-plugins/itemcondenser/
+main: com.shortcircuit.itemcondenser.Main
+description: Inventory management tools
+commands: 
+  drop:
+    description: Drops the item in hand to where the player is looking
+    usage: /<command>
+    aliases: [invdrop]
+  dropall:
+    description: Drops all items in the player's inventory to where the player is looking
+    usage: /<command>
+    aliases: [invdropall]
+  store:
+    description: Stores the item in hand in the chest the player is looking at
+    usage: /<command>
+    aliases: [invstore]
+  storeall:
+    description: Stores all the items in the player's inventory in the chest the player is looking at
+    usage: /<command>
+    aliases: [invstoreall]
+  condense:
+    description: Condenses the player's materials into blocks
+    usage: /<command>
+    aliases: [invcondense]
+  enchant:
+    description: Opens a portable enchanting table
+    usage: /<command>
+    aliases: invenchant
+    permission: itemcondenser.craft
+  enderchest:
+    description: Opens the player's ender chest
+    usage: /<command>
+    aliases: [invenderchest, ec, invec]
+    permission: itemcondenser.enderchest
+  craft:
+    description: Opens a portable 3x3 crafting grid
+    usage: /<command>
+    aliases: invcraft
+    permission: itemcondenser.craft
+  repair:
+    description: Opens a portable anvil
+    usage: /<command>
+    aliases: invrepair
+    permission: itemcondenser.repair
+  brew:
+    description: Opens a portable brewing stand
+    usage: /<command>
+    aliases: invbrew
+    permission: itemcondenser.brew
+  smelt:
+    description: Opens a portable furnace
+    usage: /<command>
+    aliases: invsmelt
+    permission: itemcondenser.smelt
+  trash:
+    description: Opens a trash can
+    usage: /<command>
+    aliases: invtrash
+    permission: itemcondenser.trash
+  sort:
+    description: Condenses all stray items into one stack.
+    usage: /<command>
+    aliases: invsort
+    permission: itemcondenser.sort
+  clear:
+    description: Clears the player's inventory
+    usage: /<command>
+    aliases: invclear
+    permission: itemcondenser.clear
+  invcreate:
+    description: Creates another player inventory
+    usage: /<command> <InventoryName>
+    permission: itemcondenser.createinventory
+  invopen:
+    description: Opens an existing additional inventory
+    usage: /<command> <InventoryName>
+    permission: itemcondenser.openinventory
+  invremove:
+    description: Deletes an existing additional inventory
+    usage: /<command> <InventoryName>
+    permission: itemcondenser.openinventory
+  invlist:
+    description: Lists the player's additional inventories
+    usage: /<command>
+    permission: itemcondenser.listinventories
+  itemname:
+    description: Rename the item in the player's hand hand
+    usage: /<command> <Remove|ItemName>
+    permission: itemcondenser.itemname
+  itemlore:
+    description: Append to, or clear, the item's lore
+    usage: /<command> <Remove|ItemLore>
+    permission: itemcondenser.itemlore
+  moreitems:
+    description: Give the player a full stack of the item in the player's hand
+    usage: /<command>
+    permission: itemcondenser.moreitems
+permissons:
+  itemcondenser.*:
+    description: Gives access to all ItemCondenser commands
+    children:
+      itemcondenser.clear: true
+      itemcondenser.condense: true
+      itemcondenser.craft: true
+      itemcondenser.enchant: true
+      itemcondenser.enderchest: true
+      itemcondenser.sort: true
+      itemcondenser.repair: true
+      itemcondenser.brew: true
+      itemcondenser.smelt: true
+      itemcondenser.trash: true
+      itemcondenser.drop: true
+      itemcondenser.dropall: true
+      itemcondenser.store: true
+      itemcondenser.storeall: true
+      itemcondenser.createinventory: true
+      itemcondenser.openinventory: true
+      itemcondenser.removeinventory: true
+      itemcondenser.listinventories: true
+      itemcondenser.itemname: true
+      itemcondenser.itemlore: true
+      itemcondenser.moreitems: true
+    default: op
+  itemcondenser.drop:
+    description: Gives access to the drop command
+    default: not-op
+  itemcondenser.dropall:
+    description: Gives access to the dropall command
+    default: not-op
+  itemcondenser.store:
+    description: Gives access to the store command
+    default: not-op
+  itemcondenser.storeall:
+    description: Gives access to the storeall command
+    default: not-op
+  itemcondenser.clear:
+    description: Gives access to the clear command
+    default: not-op
+  itemcondenser.condense:
+    description: Gives access to the condense command
+    default: not-op
+  itemcondenser.craft:
+    description: Gives access to the craft command
+    default: not-op
+  itemcondenser.enchant:
+    description: Gives access to the enchant command
+    default: op
+  itemcondenser.enderchest:
+    description: Gives access to the enderchest command
+    default: op
+  itemcondenser.sort:
+    description: Gives access to the sort command
+    default: not-op
+  itemcondenser.repair:
+    description: Gives access to the repair command
+    default: op
+  itemcondenser.brew:
+    description: Gives access to the brew command
+    default: op
+  itemcondenser.smelt:
+    description: Gives access to the smelt command
+    default: op
+  itemcondenser.trash:
+    description: Gives access to the trash command
+    default: not-op
+  itemcondenser.createinventory:
+    description: Gives access to the inventory creation command
+    default: op
+  itemcondenser.openinventory:
+    description: Gives access to the inventory open command
+    default: op
+  itemcondenser.removeinventory:
+    description: Gives access to the inventory remove command
+    default: op
+  itemcondenser.listinventories:
+    description: Gives access to the inventory list command
+    default: op
+  itemcondenser.itemname:
+    description: Gives access to the item name command
+    default: op
+  itemcondenser.itemlore:
+    description: Gives access to the item lore command
+    default: op
+  itemcondenser.moreitems:
+    description: Gives access to the more items command
+    default: op
