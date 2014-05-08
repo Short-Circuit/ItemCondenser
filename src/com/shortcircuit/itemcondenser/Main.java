@@ -1,6 +1,5 @@
 package com.shortcircuit.itemcondenser;
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -21,43 +20,42 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import com.shortcircuit.itemcondenser.Updater.ReleaseType;
+import com.shortcircuit.itemcondenser.Updater.UpdateType;
+
 public final class Main extends JavaPlugin{
-    static double version;
     static double currentVersion;
-    MyConfigManager manager;
-    MyConfig config;
     Logger logger = Bukkit.getLogger();
-    HashMap<Player, String> isInvOpen = new HashMap<Player, String>();
+    static HashMap<Player, String> isInvOpen = new HashMap<Player, String>();
+    InventoryHandler inventory_handler;
+    Updater updater;
+    static boolean update = false;
+    static String name;
+    static String version;
+    static String link;
+    static ReleaseType type;
+    static File file;
     public void onEnable(){
         logger.info("[ItemCondenser] ItemCondenser by ShortCircuit908");
         logger.info("[ItemCondenser] ItemCondenser enabled");
-        manager = new MyConfigManager(this);
+        inventory_handler = new InventoryHandler(this);
         File configFile = new File(this.getDataFolder() + "/config.yml");
         if(!configFile.exists()){
             logger.info("[ItemCondenser] No configuration file found, creating one");
             saveDefaultConfig();
         }
-        config = manager.getNewConfig("config.yml", new String[] {"Configuration"});
-        Bukkit.getPluginManager().registerEvents(new InventoryListener(this), this);
-        Bukkit.getPluginManager().registerEvents(new UpdateListener(this), this);
-        version = Double.parseDouble(this.getDescription().getVersion());
-        try{
-            currentVersion = Update.getCurrentVersion();
-            if(currentVersion > version){
-                Bukkit.getLogger().info("[ItemCondenser] A new version of ItemCondenser is available (v" + Update.getCurrentVersion() + ")");
-                Bukkit.getLogger().info("[ItemCondenser] " + this.getDescription().getWebsite());
-            }
-        }
-        catch(IOException e){
-            currentVersion = 0.0;
-            Bukkit.getLogger().warning("[ItemCondenser] Cannot connect to update server");
-        }
+        file = this.getFile();
+        updater = new Updater(this, 71867, file, UpdateType.NO_DOWNLOAD, true);
+        update = updater.getResult() == Updater.UpdateResult.UPDATE_AVAILABLE;
+        name = updater.getLatestName();
+        version = updater.getLatestGameVersion();
+        link = updater.getLatestFileLink();
+        type = updater.getLatestType();
     }
     @SuppressWarnings("deprecation")
     public boolean onCommand(CommandSender sender, Command cmd, String commandLabel, String[] args){
         if(sender instanceof Player){
             Player player = (Player) sender;
-            config.reloadConfig();
             if(commandLabel.equalsIgnoreCase("craft") || commandLabel.equalsIgnoreCase("invcraft")){
                 if(player.hasPermission("itemcondenser.craft")){
                     player.openWorkbench(player.getLocation(), true);
@@ -467,31 +465,9 @@ public final class Main extends JavaPlugin{
                     player.sendMessage(ChatColor.RED + "Insufficient permissions");
                 }
             }
-            /*
             else if(commandLabel.equalsIgnoreCase("invcreate")){
                 if(player.hasPermission("itemcondenser.invcreate")){
-                    if(args.length >= 1){
-                        if(CoreMain.fileVarExists("Inventories", "Inventories." + player.getName() + "." + args[0].toLowerCase())){
-                            player.sendMessage(ChatColor.GREEN + "You already have an inventory named " + ChatColor.LIGHT_PURPLE + args[0]);
-                        }
-                        else{
-                            Set<String> invs = new HashSet<String>();
-                            if(CoreMain.fileVarExists("Inventories", "Inventories." + player.getName())){
-                                invs = CoreMain.fileGetSection("Inventories", "Inventories." + player.getName()).getKeys(false);
-                            }
-                            if(invs.toArray().length < config.getInt("Inventories.MaximumPerPlayer") || player.isOp()){
-                                Inventory inv = Bukkit.createInventory(player, 36, args[0]);
-                                CoreMain.fileVarSave("Inventories", "Inventories." + player.getName() + "." + args[0].toLowerCase(), "");
-                                player.openInventory(inv);
-                            }
-                            else{
-                                player.sendMessage(ChatColor.GREEN + "You have reached the maximum number of inventories");
-                            }
-                        }
-                    }
-                    else{
-                        player.sendMessage(ChatColor.RED + "Insufficient arguments");
-                    }
+                    inventory_handler.saveInventory(player, player.getInventory());
                 }
                 else{
                     player.sendMessage(ChatColor.RED + "Insufficient permissions");
@@ -499,39 +475,6 @@ public final class Main extends JavaPlugin{
             }
             else if(commandLabel.equalsIgnoreCase("invopen")){
                 if(player.hasPermission("itemcondenser.invopen")){
-                    if(args.length >= 1){
-                        if(!CoreMain.fileVarExists("Inventories", "Inventories." + player.getName() + "." + args[0].toLowerCase())){
-                            player.sendMessage(ChatColor.GREEN + "You do not have an inventory named " + ChatColor.LIGHT_PURPLE + args[0]);
-                        }
-                        else{
-                            Inventory inv = Bukkit.createInventory(player, 36, args[0].toLowerCase());
-                            List<ItemStack> items = (ArrayList<ItemStack>)CoreMain.fileVarLoad("Inventories", "Inventories." + player.getName() + "." + args[0].toLowerCase());
-                            for(ItemStack item : items){
-                                ItemMeta meta = item.getItemMeta();
-                                List<String> lore = meta.getLore();
-                                List<String> newLore = new ArrayList<String>();
-                                if(lore != null){
-                                    if(!lore.isEmpty()){
-                                        for(String str : lore){
-                                            newLore.add(ChatColor.translateAlternateColorCodes('&', str));
-                                        }
-                                        meta.setLore(newLore);
-                                    }
-                                }
-                                if(meta.getDisplayName() != null){
-                                    if(!meta.getDisplayName().isEmpty()){
-                                        meta.setDisplayName(ChatColor.translateAlternateColorCodes('&', meta.getDisplayName()));
-                                    }
-                                }
-                                item.setItemMeta(meta);
-                                inv.addItem(item);
-                            }
-                            player.openInventory(inv);
-                        }
-                    }
-                    else{
-                        player.sendMessage(ChatColor.RED + "Insufficient arguments");
-                    }
                 }
                 else{
                     player.sendMessage(ChatColor.RED + "Insufficient permissions");
@@ -539,19 +482,6 @@ public final class Main extends JavaPlugin{
             }
             else if(commandLabel.equalsIgnoreCase("invremove")){
                 if(player.hasPermission("itemcondenser.invremove")){
-                    if(args.length >= 1){
-                        if(!CoreMain.fileVarExists("Inventories", "Inventories." + player.getName() + "." + args[0].toLowerCase())){
-                            player.sendMessage(ChatColor.GREEN + "You do not have an inventory named " + ChatColor.LIGHT_PURPLE + args[0]);
-                        }
-                        else{
-                            CoreMain.fileRemoveVar("Inventories", "Inventories." + player.getName() + "." + args[0].toLowerCase());
-                            player.sendMessage(ChatColor.GREEN + "Inventory " + ChatColor.LIGHT_PURPLE + args[0].toLowerCase()
-                                    + ChatColor.GREEN + " removed");
-                        }
-                    }
-                    else{
-                        player.sendMessage(ChatColor.RED + "Insufficient arguments");
-                    }
                 }
                 else{
                     player.sendMessage(ChatColor.RED + "Insufficient permissions");
@@ -559,24 +489,11 @@ public final class Main extends JavaPlugin{
             }
             else if(commandLabel.equalsIgnoreCase("invlist")){
                 if(player.hasPermission("itemcondenser.invlist")){
-                    if(CoreMain.fileVarExists("Inventories", "Inventories." + player.getName())){
-                        Set<String> invs = CoreMain.fileGetSection("Inventories", "Inventories." + player.getName()).getKeys(false);
-                        if(invs.isEmpty()){
-                            player.sendMessage(ChatColor.GREEN + "You do not have any additional inventories");
-                        }
-                        else{
-                            player.sendMessage(ChatColor.GREEN + "Inventories:");
-                            for(int i = 1; i <= invs.toArray().length; i++){
-                                player.sendMessage(ChatColor.GREEN + "[" + i + "] " + ChatColor.LIGHT_PURPLE + invs.toArray()[i - 1]);
-                            }
-                        }
-                    }
                 }
                 else{
                     player.sendMessage(ChatColor.RED + "Insufficient permissions");
                 }
             }
-             */
             else if(commandLabel.equalsIgnoreCase("itemname")){
                 if(player.hasPermission("itemcondenser.itemname")){
                     if(args.length >= 1){
@@ -605,6 +522,7 @@ public final class Main extends JavaPlugin{
                 }
             }
             else if(commandLabel.equalsIgnoreCase("itemlore")){
+                inventory_handler.saveInventory(player, player.getInventory());
                 if(player.hasPermission("itemcondenser.itemname")){
                     if(args.length >= 1){
                         ItemStack item = player.getItemInHand();

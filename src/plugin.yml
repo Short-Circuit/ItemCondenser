@@ -4,7 +4,7 @@ author: ShortCircuit908
 website: http://dev.bukkit.org/bukkit-plugins/itemcondenser/
 main: com.shortcircuit.itemcondenser.Main
 description: Inventory management tools
-commands: 
+commands:
   drop:
     description: Drops the item in hand to where the player is looking
     usage: /<command>
