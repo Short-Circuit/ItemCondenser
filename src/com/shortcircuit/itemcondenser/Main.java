@@ -1,8 +1,8 @@
 package com.shortcircuit.itemcondenser;
 import java.io.File;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Logger;
 
 import org.bukkit.Bukkit;
@@ -24,17 +24,15 @@ import com.shortcircuit.itemcondenser.Updater.ReleaseType;
 import com.shortcircuit.itemcondenser.Updater.UpdateType;
 
 public final class Main extends JavaPlugin{
-    static double currentVersion;
-    Logger logger = Bukkit.getLogger();
-    static HashMap<Player, String> isInvOpen = new HashMap<Player, String>();
-    InventoryHandler inventory_handler;
-    Updater updater;
-    static boolean update = false;
-    static String name;
-    static String version;
-    static String link;
-    static ReleaseType type;
-    static File file;
+    public Logger logger = Bukkit.getLogger();
+    public InventoryHandler inventory_handler;
+    private Updater updater;
+    public boolean update = false;
+    public String name;
+    public String version;
+    public String link;
+    public ReleaseType type;
+    public File file;
     public void onEnable(){
         logger.info("[ItemCondenser] ItemCondenser by ShortCircuit908");
         logger.info("[ItemCondenser] ItemCondenser enabled");
@@ -51,22 +49,22 @@ public final class Main extends JavaPlugin{
         version = updater.getLatestGameVersion();
         link = updater.getLatestFileLink();
         type = updater.getLatestType();
+        Bukkit.getServer().getPluginManager().registerEvents(new InventoryListener(this), this);
     }
     @SuppressWarnings("deprecation")
     public boolean onCommand(CommandSender sender, Command cmd, String commandLabel, String[] args){
         if(sender instanceof Player){
             Player player = (Player) sender;
-            if(commandLabel.equalsIgnoreCase("craft") || commandLabel.equalsIgnoreCase("invcraft")){
-                if(player.hasPermission("itemcondenser.craft")){
+            if(commandLabel.equalsIgnoreCase("ctable")){
+                if(player.hasPermission("ItemCondenser.Utility.Craft")){
                     player.openWorkbench(player.getLocation(), true);
                 }
                 else{
                     player.sendMessage(ChatColor.RED + "Insufficient permissions");
                 }
             }
-            else if(commandLabel.equalsIgnoreCase("enderchest") || commandLabel.equalsIgnoreCase("invenderchest")
-                    || commandLabel.equalsIgnoreCase("ec") || commandLabel.equalsIgnoreCase("invec")){
-                if(player.hasPermission("itemcondenser.enderchest")){
+            else if(commandLabel.equalsIgnoreCase("echest")){
+                if(player.hasPermission("ItemCondenser.Utility.EnderChest")){
                     Inventory enderInv = player.getEnderChest();
                     player.openInventory(enderInv);
                 }
@@ -74,8 +72,8 @@ public final class Main extends JavaPlugin{
                     player.sendMessage(ChatColor.RED + "Insufficient permissions");
                 }
             }
-            else if(commandLabel.equalsIgnoreCase("repair") || commandLabel.equalsIgnoreCase("invrepair")){
-                if(player.hasPermission("itemcondenser.repair")){
+            else if(commandLabel.equalsIgnoreCase("anvil")){
+                if(player.hasPermission("ItemCondenser.Utility.Repair")){
                     //Inventory anvilInv = Bukkit.createInventory(player, InventoryType.ANVIL);
                     //player.openInventory(anvilInv);
                     player.sendMessage(ChatColor.RED + "This feature has not been implemented (waiting for CraftBukkit)");
@@ -84,11 +82,8 @@ public final class Main extends JavaPlugin{
                     player.sendMessage(ChatColor.RED + "Insufficient permissions");
                 }
             }
-            /* TODO: Brewing
-             * 
-             */
-            else if(commandLabel.equalsIgnoreCase("brew") || commandLabel.equalsIgnoreCase("invbrew")){
-                if(player.hasPermission("itemcondenser.brew")){
+            else if(commandLabel.equalsIgnoreCase("brew")){
+                if(player.hasPermission("ItemCondenser.Utility.Brew")){
                     //Inventory brewInv = Bukkit.createInventory(player, InventoryType.BREWING);
                     //player.openInventory(brewInv);
                     InventoryView view = player.openWorkbench(player.getLocation(), true);
@@ -96,15 +91,14 @@ public final class Main extends JavaPlugin{
                     for(int space : spaces){
                         view.setItem(space, new ItemStack(Material.THIN_GLASS, 1));
                     }
-                    isInvOpen.put(player, "brew");
                     player.sendMessage(ChatColor.RED + "This feature has not been implemented (waiting for CraftBukkit)");
                 }
                 else{
                     player.sendMessage(ChatColor.RED + "Insufficient permissions");
                 }
             }
-            else if(commandLabel.equalsIgnoreCase("smelt") || commandLabel.equalsIgnoreCase("invsmelt")){
-                if(player.hasPermission("itemcondenser.smelt")){
+            else if(commandLabel.equalsIgnoreCase("smelt")){
+                if(player.hasPermission("ItemCondenser.Utility.Smelt")){
                     //Inventory smeltInv = Bukkit.createInventory(player, InventoryType.FURNACE);
                     //player.openInventory(smeltInv);
                     player.sendMessage(ChatColor.RED + "This feature has not been implemented (waiting for CraftBukkit)");
@@ -113,8 +107,8 @@ public final class Main extends JavaPlugin{
                     player.sendMessage(ChatColor.RED + "Insufficient permissions");
                 }
             }
-            else if(commandLabel.equalsIgnoreCase("trash") || commandLabel.equalsIgnoreCase("invtrash")){
-                if(player.hasPermission("itemcondenser.trash")){
+            else if(commandLabel.equalsIgnoreCase("trash")){
+                if(player.hasPermission("ItemCondenser.Utility.Trash")){
                     Inventory trashInv = Bukkit.createInventory(null, 36, "Trash");
                     player.openInventory(trashInv);
                 }
@@ -122,9 +116,9 @@ public final class Main extends JavaPlugin{
                     player.sendMessage(ChatColor.RED + "Insufficient permissions");
                 }
             }
-            else if(commandLabel.equalsIgnoreCase("clear") || commandLabel.equalsIgnoreCase("invclear")){
+            else if(commandLabel.equalsIgnoreCase("clear")){
                 Inventory inv = player.getInventory();
-                if(player.hasPermission("itemcondenser.clear")){
+                if(player.hasPermission("ItemCondenser.Clear")){
                     inv.clear();
                     player.sendMessage(ChatColor.GREEN + "Inventory cleared");
                 }
@@ -132,66 +126,64 @@ public final class Main extends JavaPlugin{
                     player.sendMessage(ChatColor.RED + "Insufficient permissions");
                 }
             }
-            else if(commandLabel.equalsIgnoreCase("store") || commandLabel.equalsIgnoreCase("invstore")){
-                if(player.hasPermission("itemcondenser.store")){
-                    if(player.hasPermission("itemcondenser.store")){
-                        Inventory inv = player.getInventory();
-                        ItemStack item = player.getItemInHand();
-                        Location lookAt = player.getTargetBlock(null, 32).getLocation();
-                        Block block = player.getWorld().getBlockAt(lookAt);
-                        if(block.getType() == Material.CHEST || block.getType() == Material.TRAPPED_CHEST){
-                            Chest chest = (Chest) player.getWorld().getBlockAt(lookAt).getState();
-                            if(item != null && item.getType() != Material.AIR){
-                                if(chest.getInventory().firstEmpty() == -1){
-                                    player.sendMessage(ChatColor.RED + "Chest is full");
+            else if(commandLabel.equalsIgnoreCase("store")){
+                if(player.hasPermission("ItemCondenser.Items.Store")){
+                    Inventory inv = player.getInventory();
+                    ItemStack item = player.getItemInHand();
+                    Location lookAt = player.getTargetBlock(null, 32).getLocation();
+                    Block block = player.getWorld().getBlockAt(lookAt);
+                    if(block.getType() == Material.CHEST || block.getType() == Material.TRAPPED_CHEST){
+                        Chest chest = (Chest) player.getWorld().getBlockAt(lookAt).getState();
+                        if(item != null && item.getType() != Material.AIR){
+                            if(chest.getInventory().firstEmpty() == -1){
+                                player.sendMessage(ChatColor.RED + "Chest is full");
+                            }
+                            else{
+                                inv.removeItem(item);
+                                chest.getInventory().addItem(item);
+                                short data = item.getDurability();
+                                if(data != 0) {
+                                    player.sendMessage(ChatColor.GREEN + "Stored " + ChatColor.LIGHT_PURPLE + item.getType() + ":"
+                                            + item.getDurability() + ChatColor.GREEN + " x " + ChatColor.LIGHT_PURPLE + item.getAmount());
                                 }
-                                else{
-                                    inv.removeItem(item);
-                                    chest.getInventory().addItem(item);
-                                    short data = item.getDurability();
-                                    if(data != 0) {
-                                        player.sendMessage(ChatColor.GREEN + "Stored " + ChatColor.LIGHT_PURPLE + item.getType() + ":"
-                                                + item.getDurability() + ChatColor.GREEN + " x " + ChatColor.LIGHT_PURPLE + item.getAmount());
-                                    }
-                                    else {
-                                        player.sendMessage(ChatColor.GREEN + "Stored " + ChatColor.LIGHT_PURPLE + item.getType()
-                                                + ChatColor.GREEN + " x " + ChatColor.LIGHT_PURPLE + item.getAmount());
-                                    }
+                                else {
+                                    player.sendMessage(ChatColor.GREEN + "Stored " + ChatColor.LIGHT_PURPLE + item.getType()
+                                            + ChatColor.GREEN + " x " + ChatColor.LIGHT_PURPLE + item.getAmount());
                                 }
                             }
                         }
-                        else if(block.getType() == Material.ENDER_CHEST){
-                            Inventory enderInv = player.getEnderChest();
-                            if(item != null && item.getType() != Material.AIR){
-                                if(enderInv.firstEmpty() == -1){
-                                    player.sendMessage(ChatColor.RED + "Ender chest is full");
+                    }
+                    else if(block.getType() == Material.ENDER_CHEST){
+                        Inventory enderInv = player.getEnderChest();
+                        if(item != null && item.getType() != Material.AIR){
+                            if(enderInv.firstEmpty() == -1){
+                                player.sendMessage(ChatColor.RED + "Ender chest is full");
+                            }
+                            else{
+                                inv.removeItem(item);
+                                enderInv.addItem(item);
+                                short data = item.getDurability();
+                                if(data != 0) {
+                                    player.sendMessage(ChatColor.GREEN + "Stored " + ChatColor.LIGHT_PURPLE + item.getType() + ":"
+                                            + item.getDurability() + ChatColor.GREEN + " x " + ChatColor.LIGHT_PURPLE + item.getAmount());
                                 }
-                                else{
-                                    inv.removeItem(item);
-                                    enderInv.addItem(item);
-                                    short data = item.getDurability();
-                                    if(data != 0) {
-                                        player.sendMessage(ChatColor.GREEN + "Stored " + ChatColor.LIGHT_PURPLE + item.getType() + ":"
-                                                + item.getDurability() + ChatColor.GREEN + " x " + ChatColor.LIGHT_PURPLE + item.getAmount());
-                                    }
-                                    else {
-                                        player.sendMessage(ChatColor.GREEN + "Stored " + ChatColor.LIGHT_PURPLE + item.getType()
-                                                + ChatColor.GREEN + " x " + ChatColor.LIGHT_PURPLE + item.getAmount());
-                                    }
+                                else {
+                                    player.sendMessage(ChatColor.GREEN + "Stored " + ChatColor.LIGHT_PURPLE + item.getType()
+                                            + ChatColor.GREEN + " x " + ChatColor.LIGHT_PURPLE + item.getAmount());
                                 }
                             }
-                        }
-                        else{
-                            player.sendMessage(ChatColor.RED + "No chest to store items in");
                         }
                     }
                     else{
-                        player.sendMessage(ChatColor.RED + "Insufficient permissions");
+                        player.sendMessage(ChatColor.RED + "No chest to store items in");
                     }
                 }
+                else{
+                    player.sendMessage(ChatColor.RED + "Insufficient permissions");
+                }
             }
-            else if(commandLabel.equalsIgnoreCase("storeall") || commandLabel.equalsIgnoreCase("invstoreall")){
-                if(player.hasPermission("itemcondenser.storeall")){
+            else if(commandLabel.equalsIgnoreCase("storeall")){
+                if(player.hasPermission("ItemCondenser.Items.StoreAll")){
                     Inventory inv = player.getInventory();
                     ItemStack[] items = inv.getContents();
                     Location lookAt = player.getTargetBlock(null, 32).getLocation();
@@ -252,8 +244,8 @@ public final class Main extends JavaPlugin{
                     player.sendMessage(ChatColor.RED + "Insufficient permissions");
                 }
             }
-            else if(commandLabel.equalsIgnoreCase("drop") || commandLabel.equalsIgnoreCase("invdrop")){
-                if(player.hasPermission("itemcondenser.drop")){
+            else if(commandLabel.equalsIgnoreCase("drop")){
+                if(player.hasPermission("ItemCondenser.Items.Drop")){
                     Inventory inv = player.getInventory();
                     ItemStack item = player.getItemInHand();
                     if(item.getType() != Material.AIR){
@@ -275,8 +267,8 @@ public final class Main extends JavaPlugin{
                     player.sendMessage(ChatColor.RED + "Insufficient permissions");
                 }
             }
-            else if(commandLabel.equalsIgnoreCase("dropall") || commandLabel.equalsIgnoreCase("invdropall")){
-                if(player.hasPermission("itemcondenser.dropall")){
+            else if(commandLabel.equalsIgnoreCase("dropall")){
+                if(player.hasPermission("ItemCondenser.Items.DropAll")){
                     Inventory inv = player.getInventory();
                     ItemStack[] items = inv.getContents();
                     for(ItemStack item : items){
@@ -301,8 +293,8 @@ public final class Main extends JavaPlugin{
                     player.sendMessage(ChatColor.RED + "Insufficient permissions");
                 }
             }
-            else if(commandLabel.equalsIgnoreCase("sort") || commandLabel.equalsIgnoreCase("invsort")){
-                if(player.hasPermission("itemcondenser.sort")){
+            else if(commandLabel.equalsIgnoreCase("sort")){
+                if(player.hasPermission("ItemCondenser.Sort")){
                     Inventory inv = player.getInventory();
                     Inventory newInv = Bukkit.createInventory(player, 36);
                     Inventory enderInv = player.getEnderChest();
@@ -340,21 +332,21 @@ public final class Main extends JavaPlugin{
                     player.sendMessage(ChatColor.RED + "Insufficient permissions");
                 }
             }
-            else if(commandLabel.equalsIgnoreCase("enchant") || commandLabel.equalsIgnoreCase("invenchant")){
-                if(player.hasPermission("itemcondenser.enchant")){
+            else if(commandLabel.equalsIgnoreCase("etable")){
+                if(player.hasPermission("ItemCondenser.Utility.Enchant")){
                     player.openEnchanting(player.getLocation(), true);
                 }
                 else{
                     player.sendMessage(ChatColor.RED + "Insufficient permissions");
                 }
             }
-            else if(commandLabel.equalsIgnoreCase("condense") || commandLabel.equalsIgnoreCase("invcondense")){
-                if(player.hasPermission("itemcondenser.sort")){
+            else if(commandLabel.equalsIgnoreCase("condense")){
+                if(player.hasPermission("ItemCondenser.Sort")){
                     player.performCommand("sort");
                 }
                 Inventory inv = player.getInventory();
                 ItemStack[] items = inv.getContents();
-                if(player.hasPermission("itemcondenser.condense")){
+                if(player.hasPermission("ItemCondenser.Condense")){
                     ItemStack[] itemReference = {new ItemStack(Material.GOLD_NUGGET), new ItemStack(Material.IRON_INGOT, 9),
                             new ItemStack(Material.DIAMOND), new ItemStack(Material.COAL), new ItemStack(Material.WHEAT),
                             new ItemStack(Material.REDSTONE), new ItemStack(Material.EMERALD), new ItemStack(Material.GOLD_INGOT),
@@ -466,36 +458,87 @@ public final class Main extends JavaPlugin{
                 }
             }
             else if(commandLabel.equalsIgnoreCase("invcreate")){
-                if(player.hasPermission("itemcondenser.invcreate")){
-                    inventory_handler.saveInventory(player, player.getInventory());
+                if(player.hasPermission("ItemCondenser.Inventories.Create")){
+                    if(args.length >= 1){
+                        if(inventory_handler.getInventoryCount(player) < this.getConfig().getInt("Inventories.MaximumPerPlayer") || player.hasPermission("ItemCondenser.Inventories.Create.Infinite")){
+                            if(!inventory_handler.hasInventory(player, args[0])){
+                                player.openInventory(Bukkit.createInventory(player, 36, args[0]));
+                                player.setMetadata("invIsOpen", new EntityMetadata(this, true));
+                            }
+                            else{
+                                player.sendMessage(ChatColor.LIGHT_PURPLE + "[ItemCondenser]" + ChatColor.GREEN + " You already have an inventory named " + ChatColor.LIGHT_PURPLE + args[0]);
+                            }
+                        }
+                        else{
+                            player.sendMessage(ChatColor.LIGHT_PURPLE + "[ItemCondenser]" + ChatColor.GREEN + " You have reached your maximum inventory count");
+                        }
+                    }
+                    else{
+                        player.sendMessage(ChatColor.RED + "Invalid arguments");
+                    }
                 }
                 else{
                     player.sendMessage(ChatColor.RED + "Insufficient permissions");
                 }
             }
             else if(commandLabel.equalsIgnoreCase("invopen")){
-                if(player.hasPermission("itemcondenser.invopen")){
+                if(player.hasPermission("ItemCondenser.Inventories.Open")){
+                    if(args.length >= 1){
+                        if(inventory_handler.hasInventory(player, args[0])){
+                            Inventory inv = inventory_handler.loadInventory(player, args[0]);
+                            player.openInventory(inv);
+                            player.setMetadata("invIsOpen", new EntityMetadata(this, true));
+                        }
+                        else{
+                            player.sendMessage(ChatColor.LIGHT_PURPLE + "[ItemCondenser]" + ChatColor.GREEN + " You do not have an inventory named " + ChatColor.LIGHT_PURPLE + args[0]);
+                        }
+                    }
+                    else{
+                        player.sendMessage(ChatColor.RED + "Invalid arguments");
+                    }
                 }
                 else{
                     player.sendMessage(ChatColor.RED + "Insufficient permissions");
                 }
             }
             else if(commandLabel.equalsIgnoreCase("invremove")){
-                if(player.hasPermission("itemcondenser.invremove")){
+                if(player.hasPermission("ItemCondenser.Inventories.Remove")){
+                    if(args.length >= 1){
+                        if(inventory_handler.hasInventory(player, args[0])){
+                            inventory_handler.removeInventory(player, args[0]);
+                            player.sendMessage(ChatColor.LIGHT_PURPLE + "[ItemCondenser]" + ChatColor.GREEN + " Successfully removed the inventory " + ChatColor.LIGHT_PURPLE + args[0]);
+                        }
+                        else{
+                            player.sendMessage(ChatColor.LIGHT_PURPLE + "[ItemCondenser]" + ChatColor.GREEN + " You do not have an inventory named " + ChatColor.LIGHT_PURPLE + args[0]);
+                        }
+                    }
+                    else{
+                        player.sendMessage(ChatColor.RED + "Invalid arguments");
+                    }
                 }
                 else{
                     player.sendMessage(ChatColor.RED + "Insufficient permissions");
                 }
             }
             else if(commandLabel.equalsIgnoreCase("invlist")){
-                if(player.hasPermission("itemcondenser.invlist")){
+                if(player.hasPermission("ItemCondenser.Inventories.List")){
+                    Set<String> inventories = inventory_handler.getInventories(player);
+                    if(inventories.size() > 0){
+                        player.sendMessage(ChatColor.LIGHT_PURPLE + "[ItemCondenser]" + ChatColor.GREEN + " Your inventories:");
+                        for(int i = 0; i < inventories.size(); i++){
+                            player.sendMessage(ChatColor.LIGHT_PURPLE + "[" + (i + 1) + "] " + ChatColor.GREEN + inventories.toArray()[i]);
+                        }
+                    }
+                    else{
+                        player.sendMessage(ChatColor.LIGHT_PURPLE + "[ItemCondenser]" + ChatColor.GREEN + " You do not have anu inventories");
+                    }
                 }
                 else{
                     player.sendMessage(ChatColor.RED + "Insufficient permissions");
                 }
             }
             else if(commandLabel.equalsIgnoreCase("itemname")){
-                if(player.hasPermission("itemcondenser.itemname")){
+                if(player.hasPermission("ItemCondenser.Items.Name")){
                     if(args.length >= 1){
                         for(int i = 1; i < args.length; i++){
                             args[0] = args[0] + " " + args[i];
@@ -523,7 +566,7 @@ public final class Main extends JavaPlugin{
             }
             else if(commandLabel.equalsIgnoreCase("itemlore")){
                 inventory_handler.saveInventory(player, player.getInventory());
-                if(player.hasPermission("itemcondenser.itemname")){
+                if(player.hasPermission("ItemCondenser.Items.Lore")){
                     if(args.length >= 1){
                         ItemStack item = player.getItemInHand();
                         if(item != null){
@@ -556,7 +599,7 @@ public final class Main extends JavaPlugin{
                 }
             }
             else if(commandLabel.equalsIgnoreCase("moreitems")){
-                if(player.hasPermission("itemcondenser.moreitems")){
+                if(player.hasPermission("ItemCondenser.Items.More")){
                     ItemStack item = player.getItemInHand();
                     if(item != null){
                         item.setAmount(64);
@@ -568,81 +611,5 @@ public final class Main extends JavaPlugin{
             logger.info("Cannot run this command from the console");
         }
         return true;
-    }
-    public static String colorToChar(String original){
-        String colChar = "";
-        for(ChatColor color : ChatColor.values()){
-            switch(color){
-            case YELLOW:
-                colChar = "e";
-                break;
-            case WHITE:
-                colChar = "f";
-                break;
-            case UNDERLINE:
-                colChar = "n";
-                break;
-            case STRIKETHROUGH:
-                colChar = "m";
-                break;
-            case RESET:
-                colChar = "r";
-                break;
-            case RED:
-                colChar = "c";
-                break;
-            case MAGIC:
-                colChar = "k";
-                break;
-            case LIGHT_PURPLE:
-                colChar = "d";
-                break;
-            case ITALIC: 
-                colChar = "o";
-                break;
-            case GREEN:
-                colChar = "a";
-                break;
-            case GRAY:
-                colChar = "7";
-                break;
-            case GOLD:
-                colChar = "6";
-                break;
-            case DARK_RED:
-                colChar = "4";
-                break;
-            case DARK_PURPLE:
-                colChar = "5";
-                break;
-            case DARK_GREEN:
-                colChar = "2";
-                break;
-            case DARK_GRAY:
-                colChar = "8";
-                break;
-            case DARK_BLUE:
-                colChar = "1";
-                break;
-            case DARK_AQUA:
-                colChar = "3";
-                break;
-            case BOLD:
-                colChar = "l";
-                break;
-            case BLUE:
-                colChar = "9";
-                break;
-            case BLACK:
-                colChar = "0";
-                break;
-            case AQUA:
-                colChar = "b";
-                break;
-            default: colChar = "";
-            }
-            original = original.replace(color + "", "&" + colChar);
-        }
-        return original;
     }
 }

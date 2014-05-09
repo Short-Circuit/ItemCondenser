@@ -5,20 +5,19 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.plugin.Plugin;
 
 public class UpdateListener implements Listener{
-    Plugin plugin;
-    public UpdateListener(Plugin plugin){
-        this.plugin = plugin;
+    Main main;
+    public UpdateListener(Main main){
+        this.main = main;
     }
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event){
         Player player = event.getPlayer();
-        if(player.hasPermission("itemcondenser.updates") && Main.update){
+        if(player.hasPermission("itemcondenser.updates") && main.update){
             player.sendMessage(ChatColor.LIGHT_PURPLE + "[ItemCondenser] "
-                    + ChatColor.GREEN + "An update is available: " + Main.name + ", a "
-                    + Main.type + " for " + Main.version + " available at " + Main.link);
+                    + ChatColor.GREEN + "An update is available: " + main.name + ", a "
+                    + main.type + " for " + main.version + " available at " + main.link);
         }
     }
 }

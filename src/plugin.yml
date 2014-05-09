@@ -1,5 +1,5 @@
 name: ItemCondenser
-version: 2.9
+version: 3.0
 author: ShortCircuit908
 website: http://dev.bukkit.org/bukkit-plugins/itemcondenser/
 main: com.shortcircuit.itemcondenser.Main
@@ -8,182 +8,111 @@ commands:
   drop:
     description: Drops the item in hand to where the player is looking
     usage: /<command>
-    aliases: [invdrop]
+    permission: ItemCondenser.Items.Drop
   dropall:
     description: Drops all items in the player's inventory to where the player is looking
     usage: /<command>
-    aliases: [invdropall]
+    permission: ItemCondenser.Items.DropAll
   store:
     description: Stores the item in hand in the chest the player is looking at
     usage: /<command>
-    aliases: [invstore]
+    permission: ItemCondenser.Items.Store
   storeall:
     description: Stores all the items in the player's inventory in the chest the player is looking at
     usage: /<command>
-    aliases: [invstoreall]
+    permission: ItemCondenser.Items.StoreAll
   condense:
     description: Condenses the player's materials into blocks
     usage: /<command>
-    aliases: [invcondense]
-  enchant:
+    permission: ItemCondenser.Condense
+  etable:
     description: Opens a portable enchanting table
     usage: /<command>
-    aliases: invenchant
-    permission: itemcondenser.craft
-  enderchest:
+    permission: ItemCondenser.Utility.Enchant
+  echest:
     description: Opens the player's ender chest
     usage: /<command>
-    aliases: [invenderchest, ec, invec]
-    permission: itemcondenser.enderchest
-  craft:
+    permission: ItemCondenser.Utility.EnderChest
+  ctable:
     description: Opens a portable 3x3 crafting grid
     usage: /<command>
-    aliases: invcraft
-    permission: itemcondenser.craft
-  repair:
+    permission: ItemCondenser.Utility.Craft
+  anvil:
     description: Opens a portable anvil
     usage: /<command>
-    aliases: invrepair
-    permission: itemcondenser.repair
+    permission: ItemCondenser.Utility.Repair
   brew:
     description: Opens a portable brewing stand
     usage: /<command>
-    aliases: invbrew
-    permission: itemcondenser.brew
+    permission: ItemCondenser.Utility.Brew
   smelt:
     description: Opens a portable furnace
     usage: /<command>
-    aliases: invsmelt
-    permission: itemcondenser.smelt
+    permission: ItemCondenser.Utility.Smelt
   trash:
     description: Opens a trash can
     usage: /<command>
-    aliases: invtrash
-    permission: itemcondenser.trash
+    permission: ItemCondenser.Utility.Trash
   sort:
     description: Condenses all stray items into one stack.
     usage: /<command>
-    aliases: invsort
-    permission: itemcondenser.sort
+    permission: ItemCondenser.Sort
   clear:
     description: Clears the player's inventory
     usage: /<command>
-    aliases: invclear
-    permission: itemcondenser.clear
+    permission: ItemCondenser.Clear
   invcreate:
     description: Creates another player inventory
     usage: /<command> <InventoryName>
-    permission: itemcondenser.createinventory
+    permission: ItemCondenser.Inventories.Create
   invopen:
     description: Opens an existing additional inventory
     usage: /<command> <InventoryName>
-    permission: itemcondenser.openinventory
+    permission: ItemCondenser.Inventories.Open
   invremove:
     description: Deletes an existing additional inventory
     usage: /<command> <InventoryName>
-    permission: itemcondenser.openinventory
+    permission: ItemCondenser.Inventories.Remove
   invlist:
     description: Lists the player's additional inventories
     usage: /<command>
-    permission: itemcondenser.listinventories
+    permission: ItemCondenser.Inventories.List
   itemname:
     description: Rename the item in the player's hand hand
     usage: /<command> <Remove|ItemName>
-    permission: itemcondenser.itemname
+    permission: ItemCondenser.Items.Name
   itemlore:
     description: Append to, or clear, the item's lore
     usage: /<command> <Remove|ItemLore>
-    permission: itemcondenser.itemlore
+    permission: ItemCondenser.Items.Lore
   moreitems:
     description: Give the player a full stack of the item in the player's hand
     usage: /<command>
-    permission: itemcondenser.moreitems
+    permission: ItemCondenser.Items.More
 permissons:
-  itemcondenser.*:
+  ItemCondenser.*:
     description: Gives access to all ItemCondenser commands
     children:
-      itemcondenser.clear: true
-      itemcondenser.condense: true
-      itemcondenser.craft: true
-      itemcondenser.enchant: true
-      itemcondenser.enderchest: true
-      itemcondenser.sort: true
-      itemcondenser.repair: true
-      itemcondenser.brew: true
-      itemcondenser.smelt: true
-      itemcondenser.trash: true
-      itemcondenser.drop: true
-      itemcondenser.dropall: true
-      itemcondenser.store: true
-      itemcondenser.storeall: true
-      itemcondenser.createinventory: true
-      itemcondenser.openinventory: true
-      itemcondenser.removeinventory: true
-      itemcondenser.listinventories: true
-      itemcondenser.itemname: true
-      itemcondenser.itemlore: true
-      itemcondenser.moreitems: true
-    default: op
-  itemcondenser.drop:
-    description: Gives access to the drop command
-    default: not-op
-  itemcondenser.dropall:
-    description: Gives access to the dropall command
-    default: not-op
-  itemcondenser.store:
-    description: Gives access to the store command
-    default: not-op
-  itemcondenser.storeall:
-    description: Gives access to the storeall command
-    default: not-op
-  itemcondenser.clear:
-    description: Gives access to the clear command
-    default: not-op
-  itemcondenser.condense:
-    description: Gives access to the condense command
-    default: not-op
-  itemcondenser.craft:
-    description: Gives access to the craft command
-    default: not-op
-  itemcondenser.enchant:
-    description: Gives access to the enchant command
-    default: op
-  itemcondenser.enderchest:
-    description: Gives access to the enderchest command
-    default: op
-  itemcondenser.sort:
-    description: Gives access to the sort command
-    default: not-op
-  itemcondenser.repair:
-    description: Gives access to the repair command
-    default: op
-  itemcondenser.brew:
-    description: Gives access to the brew command
-    default: op
-  itemcondenser.smelt:
-    description: Gives access to the smelt command
-    default: op
-  itemcondenser.trash:
-    description: Gives access to the trash command
-    default: not-op
-  itemcondenser.createinventory:
-    description: Gives access to the inventory creation command
-    default: op
-  itemcondenser.openinventory:
-    description: Gives access to the inventory open command
-    default: op
-  itemcondenser.removeinventory:
-    description: Gives access to the inventory remove command
-    default: op
-  itemcondenser.listinventories:
-    description: Gives access to the inventory list command
-    default: op
-  itemcondenser.itemname:
-    description: Gives access to the item name command
-    default: op
-  itemcondenser.itemlore:
-    description: Gives access to the item lore command
-    default: op
-  itemcondenser.moreitems:
-    description: Gives access to the more items command
+      ItemCondenser.Utility.Craft: true
+      ItemCondenser.Utility.EnderChest: true
+      ItemCondenser.Utility.Repair: true
+      ItemCondenser.Utility.Brew: true
+      ItemCondenser.Utility.Smelt: true
+      ItemCondenser.Utility.Trash: true
+      ItemCondenser.Utility.Enchant: true
+      ItemCondenser.Items.Store: true
+      ItemCondenser.Items.StoreAll: true
+      ItemCondenser.Items.Drop: true
+      ItemCondenser.Items.DropAll: true
+      ItemCondenser.Items.Name: true
+      ItemCondenser.Items.Lore: true
+      ItemCondenser.Items.More: true
+      ItemCondenser.Inventories.Create: true
+      ItemCondenser.Inventories.Create.Infinite: true
+      ItemCondenser.Inventories.Open: true
+      ItemCondenser.Inventories.Remove: true
+      ItemCondenser.Inventories.List: true
+      ItemCondenser.Sort: true
+      ItemCondenser.Clear: true
+      ItemCondenser.Condense: true
     default: op
