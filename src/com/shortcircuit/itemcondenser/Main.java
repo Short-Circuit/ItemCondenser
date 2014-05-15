@@ -43,16 +43,19 @@ public final class Main extends JavaPlugin{
             saveDefaultConfig();
         }
         file = this.getFile();
-        updater = new Updater(this, 71867, file, UpdateType.NO_DOWNLOAD, true);
-        update = updater.getResult() == Updater.UpdateResult.UPDATE_AVAILABLE;
-        name = updater.getLatestName();
-        version = updater.getLatestGameVersion();
-        link = updater.getLatestFileLink();
-        type = updater.getLatestType();
+        if(this.getConfig().getBoolean("CheckUpdates")){
+            updater = new Updater(this, 71867, file, UpdateType.NO_DOWNLOAD, true);
+            update = updater.getResult() == Updater.UpdateResult.UPDATE_AVAILABLE;
+            name = updater.getLatestName();
+            version = updater.getLatestGameVersion();
+            link = updater.getLatestFileLink();
+            type = updater.getLatestType();
+        }
         Bukkit.getServer().getPluginManager().registerEvents(new InventoryListener(this), this);
     }
     @SuppressWarnings("deprecation")
     public boolean onCommand(CommandSender sender, Command cmd, String commandLabel, String[] args){
+        inventory_handler.reloadInventories();
         if(sender instanceof Player){
             Player player = (Player) sender;
             if(commandLabel.equalsIgnoreCase("ctable")){
@@ -141,15 +144,6 @@ public final class Main extends JavaPlugin{
                             else{
                                 inv.removeItem(item);
                                 chest.getInventory().addItem(item);
-                                short data = item.getDurability();
-                                if(data != 0) {
-                                    player.sendMessage(ChatColor.GREEN + "Stored " + ChatColor.LIGHT_PURPLE + item.getType() + ":"
-                                            + item.getDurability() + ChatColor.GREEN + " x " + ChatColor.LIGHT_PURPLE + item.getAmount());
-                                }
-                                else {
-                                    player.sendMessage(ChatColor.GREEN + "Stored " + ChatColor.LIGHT_PURPLE + item.getType()
-                                            + ChatColor.GREEN + " x " + ChatColor.LIGHT_PURPLE + item.getAmount());
-                                }
                             }
                         }
                     }
@@ -162,15 +156,6 @@ public final class Main extends JavaPlugin{
                             else{
                                 inv.removeItem(item);
                                 enderInv.addItem(item);
-                                short data = item.getDurability();
-                                if(data != 0) {
-                                    player.sendMessage(ChatColor.GREEN + "Stored " + ChatColor.LIGHT_PURPLE + item.getType() + ":"
-                                            + item.getDurability() + ChatColor.GREEN + " x " + ChatColor.LIGHT_PURPLE + item.getAmount());
-                                }
-                                else {
-                                    player.sendMessage(ChatColor.GREEN + "Stored " + ChatColor.LIGHT_PURPLE + item.getType()
-                                            + ChatColor.GREEN + " x " + ChatColor.LIGHT_PURPLE + item.getAmount());
-                                }
                             }
                         }
                     }
@@ -199,15 +184,6 @@ public final class Main extends JavaPlugin{
                                 else{
                                     inv.removeItem(item);
                                     chest.getInventory().addItem(item);
-                                    short data = item.getDurability();
-                                    if(data != 0) {
-                                        player.sendMessage(ChatColor.GREEN + "Stored " + ChatColor.LIGHT_PURPLE + item.getType() + ":"
-                                                + item.getDurability() + ChatColor.GREEN + " x " + ChatColor.LIGHT_PURPLE + item.getAmount());
-                                    }
-                                    else {
-                                        player.sendMessage(ChatColor.GREEN + "Stored " + ChatColor.LIGHT_PURPLE + item.getType()
-                                                + ChatColor.GREEN + " x " + ChatColor.LIGHT_PURPLE + item.getAmount());
-                                    }
                                 }
                             }
                         }
@@ -223,15 +199,6 @@ public final class Main extends JavaPlugin{
                                 else{
                                     inv.removeItem(item);
                                     enderInv.addItem(item);
-                                    short data = item.getDurability();
-                                    if(data != 0) {
-                                        player.sendMessage(ChatColor.GREEN + "Stored " + ChatColor.LIGHT_PURPLE + item.getType() + ":"
-                                                + item.getDurability() + ChatColor.GREEN + " x " + ChatColor.LIGHT_PURPLE + item.getAmount());
-                                    }
-                                    else {
-                                        player.sendMessage(ChatColor.GREEN + "Stored " + ChatColor.LIGHT_PURPLE + item.getType()
-                                                + ChatColor.GREEN + " x " + ChatColor.LIGHT_PURPLE + item.getAmount());
-                                    }
                                 }
                             }
                         }
@@ -252,15 +219,6 @@ public final class Main extends JavaPlugin{
                         inv.removeItem(item);
                         Location lookAt = player.getTargetBlock(null, 32).getLocation().add(0.5, 1.5, 0.5);
                         player.getWorld().dropItem(lookAt, item);
-                        short data = item.getDurability();
-                        if(data != 0) {
-                            player.sendMessage(ChatColor.GREEN + "Dropped " + ChatColor.LIGHT_PURPLE + item.getType() + ":"
-                                    + item.getDurability() + ChatColor.GREEN + " x " + ChatColor.LIGHT_PURPLE + item.getAmount());
-                        }
-                        else {
-                            player.sendMessage(ChatColor.GREEN + "Dropped " + ChatColor.LIGHT_PURPLE + item.getType()
-                                    + ChatColor.GREEN + " x " + ChatColor.LIGHT_PURPLE + item.getAmount());
-                        }
                     }
                 }
                 else{
@@ -277,15 +235,6 @@ public final class Main extends JavaPlugin{
                             Location lookAt = player.getTargetBlock(null, 32).getLocation();
                             Location dropAt = player.getWorld().getHighestBlockAt(lookAt).getLocation().add(0.5, 1.5, 0.5);
                             player.getWorld().dropItem(dropAt, item);
-                            short data = item.getDurability();
-                            if(data != 0) {
-                                player.sendMessage(ChatColor.GREEN + "Dropped " + ChatColor.LIGHT_PURPLE + item.getType() + ":"
-                                        + item.getDurability() + ChatColor.GREEN + " x " + ChatColor.LIGHT_PURPLE + item.getAmount());
-                            }
-                            else {
-                                player.sendMessage(ChatColor.GREEN + "Dropped " + ChatColor.LIGHT_PURPLE + item.getType()
-                                        + ChatColor.GREEN + " x " + ChatColor.LIGHT_PURPLE + item.getAmount());
-                            }
                         }
                     }
                 }
@@ -297,33 +246,20 @@ public final class Main extends JavaPlugin{
                 if(player.hasPermission("ItemCondenser.Sort")){
                     Inventory inv = player.getInventory();
                     Inventory newInv = Bukkit.createInventory(player, 36);
-                    Inventory enderInv = player.getEnderChest();
-                    ItemStack[] items = inv.getContents();
-                    ItemStack[] enderItems = enderInv.getContents();
-                    for(ItemStack item : items){
-                        if(item != null){
-                            inv.removeItem(item);
-                            newInv.addItem(item);
+                    for(Material material : Material.values()){
+                        for(ItemStack item : inv.getContents()){
+                            if(item != null){
+                                if(item.getType().equals(material)){
+                                    inv.removeItem(item);
+                                    newInv.addItem(item);
+                                }
+                            }
                         }
                     }
-                    ItemStack[] newItems = newInv.getContents();
-                    for(ItemStack item : newItems){
+                    for(ItemStack item : newInv.getContents()){
                         if(item != null){
                             newInv.removeItem(item);
                             inv.addItem(item);
-                        }
-                    }
-                    for(ItemStack item : enderItems){
-                        if(item != null){
-                            enderInv.removeItem(item);
-                            newInv.addItem(item);
-                        }
-                    }
-                    ItemStack[] newEnderItems = newInv.getContents();
-                    for(ItemStack item : newEnderItems){
-                        if(item != null){
-                            newInv.removeItem(item);
-                            enderInv.addItem(item);
                         }
                     }
                     player.sendMessage(ChatColor.GREEN + "Inventory sorted");
@@ -341,115 +277,113 @@ public final class Main extends JavaPlugin{
                 }
             }
             else if(commandLabel.equalsIgnoreCase("condense")){
-                if(player.hasPermission("ItemCondenser.Sort")){
-                    player.performCommand("sort");
-                }
                 Inventory inv = player.getInventory();
-                ItemStack[] items = inv.getContents();
                 if(player.hasPermission("ItemCondenser.Condense")){
-                    ItemStack[] itemReference = {new ItemStack(Material.GOLD_NUGGET), new ItemStack(Material.IRON_INGOT, 9),
-                            new ItemStack(Material.DIAMOND), new ItemStack(Material.COAL), new ItemStack(Material.WHEAT),
-                            new ItemStack(Material.REDSTONE), new ItemStack(Material.EMERALD), new ItemStack(Material.GOLD_INGOT),
-                            new ItemStack(Material.MELON), new ItemStack(Material.INK_SACK, 1, (short) 4)};
-                    ItemStack[] fourItemReference = {new ItemStack(Material.GLOWSTONE_DUST), new ItemStack(Material.CLAY_BALL),
-                            new ItemStack(Material.SNOW_BALL), new ItemStack(Material.QUARTZ)};
-                    for(ItemStack item : items){
+                    for(ItemStack item : inv.getContents()){
                         if(item != null){
-                            int amount = item.getAmount();
-                            for(ItemStack referenceItem : itemReference){
-                                if(item.isSimilar(referenceItem)){
-                                    if(amount >= 9){
-                                        switch(item.getType()) {
-                                        case GOLD_NUGGET:
-                                            inv.addItem(new ItemStack(Material.GOLD_INGOT, (int)item.getAmount() / 9));
-                                            break;
-                                        case EMERALD:
-                                            inv.addItem(new ItemStack(Material.EMERALD_BLOCK, (int)item.getAmount() / 9));
-                                            break;
-                                        case IRON_INGOT:
-                                            inv.addItem(new ItemStack(Material.IRON_BLOCK, (int)item.getAmount() / 9));
-                                            break;
-                                        case COAL:
-                                            inv.addItem(new ItemStack(Material.COAL_BLOCK, (int)item.getAmount() / 9));
-                                            break;
-                                        case DIAMOND:
-                                            inv.addItem(new ItemStack(Material.DIAMOND_BLOCK, (int)item.getAmount() / 9));
-                                            break;
-                                        case WHEAT:
-                                            inv.addItem(new ItemStack(Material.HAY_BLOCK, (int)item.getAmount() / 9));
-                                            break;
-                                        case REDSTONE:
-                                            inv.addItem(new ItemStack(Material.REDSTONE_BLOCK, (int)item.getAmount() / 9));
-                                            break;
-                                        case GOLD_INGOT:
-                                            inv.addItem(new ItemStack(Material.GOLD_BLOCK, (int)item.getAmount() / 9));
-                                            break;
-                                        case MELON:
-                                            inv.addItem(new ItemStack(Material.MELON_BLOCK, (int)item.getAmount() / 9));
-                                            break;
-                                        case INK_SACK:
-                                            if(item.getDurability() == (short) 4) {
-                                                inv.addItem(new ItemStack(Material.LAPIS_BLOCK, (int)item.getAmount() / 9));
+                            inv.removeItem(item);
+                            inv.addItem(item);
+                        }
+                    }
+                    ItemStack[] items = inv.getContents();
+                    Material[] itemReference = {Material.GOLD_NUGGET, Material.IRON_INGOT,
+                            Material.DIAMOND, Material.COAL, Material.WHEAT, Material.REDSTONE,
+                            Material.EMERALD, Material.GOLD_INGOT, Material.MELON,
+                            Material.INK_SACK};
+                    Material[] fourItemReference = {Material.GLOWSTONE_DUST, Material.CLAY_BALL,
+                            Material.SNOW_BALL, Material.QUARTZ};
+                    for(ItemStack item : items){
+                        if(inv.firstEmpty() != -1){
+                            if(item != null){
+                                int amount = item.getAmount();
+                                for(Material reference : itemReference){
+                                    if(item.getType().equals(reference)){
+                                        if(amount >= 9){
+                                            switch(item.getType()) {
+                                            case GOLD_NUGGET:
+                                                inv.addItem(new ItemStack(Material.GOLD_INGOT, (int)item.getAmount() / 9));
+                                                break;
+                                            case EMERALD:
+                                                inv.addItem(new ItemStack(Material.EMERALD_BLOCK, (int)item.getAmount() / 9));
+                                                break;
+                                            case IRON_INGOT:
+                                                inv.addItem(new ItemStack(Material.IRON_BLOCK, (int)item.getAmount() / 9));
+                                                break;
+                                            case COAL:
+                                                inv.addItem(new ItemStack(Material.COAL_BLOCK, (int)item.getAmount() / 9));
+                                                break;
+                                            case DIAMOND:
+                                                inv.addItem(new ItemStack(Material.DIAMOND_BLOCK, (int)item.getAmount() / 9));
+                                                break;
+                                            case WHEAT:
+                                                inv.addItem(new ItemStack(Material.HAY_BLOCK, (int)item.getAmount() / 9));
+                                                break;
+                                            case REDSTONE:
+                                                inv.addItem(new ItemStack(Material.REDSTONE_BLOCK, (int)item.getAmount() / 9));
+                                                break;
+                                            case GOLD_INGOT:
+                                                inv.addItem(new ItemStack(Material.GOLD_BLOCK, (int)item.getAmount() / 9));
+                                                break;
+                                            case MELON:
+                                                inv.addItem(new ItemStack(Material.MELON_BLOCK, (int)item.getAmount() / 9));
+                                                break;
+                                            case INK_SACK:
+                                                if(item.getDurability() == (short) 4) {
+                                                    inv.addItem(new ItemStack(Material.LAPIS_BLOCK, (int)item.getAmount() / 9));
+                                                }
+                                                break;
+                                            default:
+                                                break;
                                             }
-                                            break;
-                                        default:
-                                            break;
+                                            if(amount == 9){
+                                                inv.removeItem(item);
+                                            }
+                                            else{
+                                                item.setAmount(amount % 9);
+                                            }
+                                            
                                         }
-                                        if(item.getAmount() == 9){
-                                            inv.removeItem(item);
-                                        }
-                                        else{
-                                            item.setAmount(item.getAmount() % 9);
-                                        }
-                                        short data = item.getDurability();
-                                        if(data != 0) {
-                                            player.sendMessage(ChatColor.GREEN + "Condensed " + ChatColor.LIGHT_PURPLE + item.getType() + ":"
-                                                    + item.getDurability() + ChatColor.GREEN + " x " + ChatColor.LIGHT_PURPLE + amount);
-                                        }
-                                        else {
-                                            player.sendMessage(ChatColor.GREEN + "Condensed " + ChatColor.LIGHT_PURPLE + item.getType()
-                                                    + ChatColor.GREEN + " x " + ChatColor.LIGHT_PURPLE + amount);
+                                    }
+                                }
+                                for(Material reference : fourItemReference){
+                                    if(item.getType().equals(reference)){
+                                        if(amount >= 4){
+                                            switch(item.getType()){
+                                            case CLAY_BALL:
+                                                inv.addItem(new ItemStack(Material.CLAY, (int)item.getAmount() / 4));
+                                                break;
+                                            case SNOW_BALL:
+                                                inv.addItem(new ItemStack(Material.SNOW_BLOCK, (int)item.getAmount() / 4));
+                                                break;
+                                            case GLOWSTONE_DUST:
+                                                inv.addItem(new ItemStack(Material.GLOWSTONE, (int)item.getAmount() / 4));
+                                                break;
+                                            case QUARTZ:
+                                                inv.addItem(new ItemStack(Material.QUARTZ_BLOCK, (int)item.getAmount() / 4));
+                                                break;
+                                            default:
+                                                break;
+                                            }
+                                            if(amount == 4){
+                                                inv.removeItem(item);
+                                            }
+                                            else{
+                                                item.setAmount(amount % 4);
+                                            }
                                         }
                                     }
                                 }
                             }
-                            for(ItemStack referenceItem : fourItemReference){
-                                if(item.isSimilar(referenceItem)){
-                                    if(amount >= 4){
-                                        switch(item.getType()){
-                                        case CLAY_BALL:
-                                            inv.addItem(new ItemStack(Material.CLAY, (int)item.getAmount() / 4));
-                                            break;
-                                        case SNOW_BALL:
-                                            inv.addItem(new ItemStack(Material.SNOW_BLOCK, (int)item.getAmount() / 4));
-                                            break;
-                                        case GLOWSTONE_DUST:
-                                            inv.addItem(new ItemStack(Material.GLOWSTONE, (int)item.getAmount() / 4));
-                                            break;
-                                        case QUARTZ:
-                                            inv.addItem(new ItemStack(Material.QUARTZ_BLOCK, (int)item.getAmount() / 4));
-                                            break;
-                                        default:
-                                            break;
-                                        }
-                                        if(item.getAmount() == 4){
-                                            inv.removeItem(item);
-                                        }
-                                        else{
-                                            item.setAmount(item.getAmount() % 4);
-                                        }
-                                        short data = item.getDurability();
-                                        if(data != 0) {
-                                            player.sendMessage(ChatColor.GREEN + "Condensed " + ChatColor.LIGHT_PURPLE + item.getType() + ":"
-                                                    + item.getDurability() + ChatColor.GREEN + " x " + ChatColor.LIGHT_PURPLE + amount);
-                                        }
-                                        else {
-                                            player.sendMessage(ChatColor.GREEN + "Condensed " + ChatColor.LIGHT_PURPLE + item.getType()
-                                                    + ChatColor.GREEN + " x " + ChatColor.LIGHT_PURPLE + amount);
-                                        }
-                                    }
-                                }
-                            }
+                        }
+                        else{
+                            player.sendMessage(ChatColor.LIGHT_PURPLE + "[ItemCondenser]" + ChatColor.GREEN + " Inventory is full!");
+                            break;
+                        }
+                    }
+                    for(ItemStack item : inv.getContents()){
+                        if(item != null){
+                            inv.removeItem(item);
+                            inv.addItem(item);
                         }
                     }
                 }

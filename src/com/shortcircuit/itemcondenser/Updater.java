@@ -16,6 +16,7 @@ import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.net.UnknownHostException;
 import java.util.Enumeration;
 import java.util.logging.Level;
 import java.util.zip.ZipEntry;
@@ -566,7 +567,12 @@ public class Updater {
             this.versionGameVersion = (String) ((JSONObject) array.get(array.size() - 1)).get(Updater.VERSION_VALUE);
 
             return true;
-        } catch (final IOException e) {
+        }
+        catch(UnknownHostException e){
+            this.main.getLogger().severe("The updater could not contact dev.bukkit.org for updating.");
+            return false;
+        }
+        catch (IOException e) {
             if (e.getMessage().contains("HTTP response code: 403")) {
                 this.main.getLogger().severe("dev.bukkit.org rejected the API key provided in mains/Updater/config.yml");
                 this.main.getLogger().severe("Please double-check your configuration to ensure it is correct.");

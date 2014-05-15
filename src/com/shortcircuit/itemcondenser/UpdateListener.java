@@ -13,11 +13,13 @@ public class UpdateListener implements Listener{
     }
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event){
-        Player player = event.getPlayer();
-        if(player.hasPermission("itemcondenser.updates") && main.update){
-            player.sendMessage(ChatColor.LIGHT_PURPLE + "[ItemCondenser] "
-                    + ChatColor.GREEN + "An update is available: " + main.name + ", a "
-                    + main.type + " for " + main.version + " available at " + main.link);
+        if(main.getConfig().getBoolean("CheckUpdates")){
+            Player player = event.getPlayer();
+            if(player.hasPermission("itemcondenser.updates") && main.update){
+                player.sendMessage(ChatColor.LIGHT_PURPLE + "[ItemCondenser] "
+                        + ChatColor.GREEN + "An update is available: " + main.name + ", a "
+                        + main.type + " for " + main.version + " available at " + main.link);
+            }
         }
     }
 }

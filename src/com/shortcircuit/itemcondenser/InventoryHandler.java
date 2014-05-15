@@ -23,6 +23,9 @@ public class InventoryHandler {
         file = new File(this.main.getDataFolder() + "/Inventories.yml");
         inventory_file = YamlConfiguration.loadConfiguration(file);
     }
+    public void reloadInventories(){
+        inventory_file = YamlConfiguration.loadConfiguration(file);
+    }
     public boolean hasInventory(Player player, String inventory_name){
         return inventory_file.contains("Inventories." + player.getName() + "." + inventory_name);
     }

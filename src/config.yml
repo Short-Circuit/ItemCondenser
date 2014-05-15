@@ -1,5 +1,6 @@
 # +-----------------------------------------------+ #
 # <                 Configuration                 > #
 # +-----------------------------------------------+ #
+CheckUpdates: true
 Inventories:
   MaximumPerPlayer: 3
