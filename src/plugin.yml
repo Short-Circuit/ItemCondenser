@@ -1,8 +1,8 @@
 name: ItemCondenser
-version: 3.2
+version: 3.5
 author: ShortCircuit908
 website: http://dev.bukkit.org/bukkit-plugins/itemcondenser/
-main: com.shortcircuit.itemcondenser.Main
+main: com.shortcircuit.itemcondenser.ItemCondenser
 description: Inventory management tools
 commands:
   drop:
@@ -23,7 +23,7 @@ commands:
     permission: ItemCondenser.Items.StoreAll
   condense:
     description: Condenses the player's materials into blocks
-    usage: /<command>
+    usage: /<command> [chest]
     permission: ItemCondenser.Condense
   etable:
     description: Opens a portable enchanting table
@@ -55,11 +55,11 @@ commands:
     permission: ItemCondenser.Utility.Trash
   sort:
     description: Condenses all stray items into one stack.
-    usage: /<command>
+    usage: /<command> [chest]
     permission: ItemCondenser.Sort
   clear:
     description: Clears the player's inventory
-    usage: /<command>
+    usage: /<command> [chest]
     permission: ItemCondenser.Clear
   invcreate:
     description: Creates another player inventory

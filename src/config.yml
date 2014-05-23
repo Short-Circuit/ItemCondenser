@@ -1,6 +1,9 @@
 # +-----------------------------------------------+ #
 # <                 Configuration                 > #
 # +-----------------------------------------------+ #
-CheckUpdates: true
 Inventories:
   MaximumPerPlayer: 3
+# If this plugin's commands conflict with another plugin, disable them here
+# To disable a command, add a line with the command name and set the value to "true"
+DisabledCommands:
+  echest: false

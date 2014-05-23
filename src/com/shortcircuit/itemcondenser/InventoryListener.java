@@ -4,13 +4,24 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.inventory.Inventory;
 
 public class InventoryListener implements Listener{
-    Main main;
-    public InventoryListener(Main main){
+    private ItemCondenser main;
+    public InventoryListener(ItemCondenser main){
         this.main = main;
     }
+    /*
+     * TODO: Set default metadata
+     */
+    @EventHandler
+    public void onLogin(final PlayerLoginEvent event){
+        event.getPlayer().setMetadata("invIsOpen", new EntityMetadata(main, false));
+    }
+    /*
+     * TODO: Save the player's additional inventory when it is closed
+     */
     @EventHandler
     public void onInventoryClose(final InventoryCloseEvent event){
         Player player = (Player)event.getPlayer();
