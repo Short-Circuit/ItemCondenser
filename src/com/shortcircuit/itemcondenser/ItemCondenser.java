@@ -241,7 +241,7 @@ public final class ItemCondenser extends JavaPlugin{
                         // Otherwise, get the inventory of the chest
                         Chest chest = (Chest)block.getState();
                         // Make sure the player is holding an item
-                        if(item != null && item.getType() != Material.AIR){
+                        if(item.getType() != Material.AIR){
                             // Make sure there is room in the chest
                             if(chest.getInventory().firstEmpty() == -1){
                                 player.sendMessage(ChatColor.RED + "Chest is full");
@@ -283,25 +283,35 @@ public final class ItemCondenser extends JavaPlugin{
              * TODO: Store all items in a chest
              */
             else if(commandLabel.equalsIgnoreCase("storeall")){
+                // Check permissions
                 if(player.hasPermission("ItemCondenser.Items.Store.All")){
+                    // Get the player's inventory, and the contents thereof
                     Inventory inv = player.getInventory();
                     ItemStack[] items = inv.getContents();
+                    // Get the target block
                     Block block = player.getTargetBlock(null, 32);
                     boolean isPrivate = false;
+                    // If Lockette is installed, check if the block is protected
                     if(lockette){
                         isPrivate = Lockette.isProtected(block);
                     }
+                    // Check if the targeted block is a chest
                     if(block.getType() == Material.CHEST || block.getType() == Material.TRAPPED_CHEST){
+                        // If the chest is private, check if the player is an allowed user
                         if(isPrivate){
                             if(!Lockette.isOwner(block, player.getName()) && !Lockette.isUser(block, player.getName(), true)
                                     && !Lockette.isEveryone(block)){
+                                // If the player is not an allowed user, tell them to GTFO
                                 player.sendMessage(ChatColor.RED + "That chest is private!");
                                 return true;
                             }
                         }
+                        // Otherwise, get the inventory of the chest
                         Chest chest = (Chest)block.getState();
+                        // Move each item in the player's inventory into the chest
                         for(ItemStack item : items){
                             if(item != null && item.getType() != Material.AIR){
+                                // Make sure there is room in the chest
                                 if(chest.getInventory().firstEmpty() == -1){
                                     player.sendMessage(ChatColor.RED + "Chest is full");
                                     break;
@@ -313,17 +323,14 @@ public final class ItemCondenser extends JavaPlugin{
                             }
                         }
                     }
+                    // Check if the targeted  block is an ender chest
                     else if(block.getType() == Material.ENDER_CHEST){
-                        if(isPrivate){
-                            if(!Lockette.isOwner(block, player.getName()) && !Lockette.isUser(block, player.getName(), true)
-                                    && !Lockette.isEveryone(block)){
-                                player.sendMessage(ChatColor.RED + "That chest is private!");
-                                return true;
-                            }
-                        }
+                        // Get the player's ender chest
                         Inventory enderInv = player.getEnderChest();
+                        // Move each item into the ender chest
                         for(ItemStack item : items){
                             if(item != null && item.getType() != Material.AIR){
+                                // Make sure there is room in the ender chest
                                 if(enderInv.firstEmpty() == -1){
                                     player.sendMessage(ChatColor.RED + "Ender chest is full");
                                     break;
@@ -348,10 +355,14 @@ public final class ItemCondenser extends JavaPlugin{
              * TODO: Drop an item
              */
             else if(commandLabel.equalsIgnoreCase("drop")){
+                // Check permissions
                 if(player.hasPermission("ItemCondenser.Items.Drop")){
+                    // Get the player's inventory, and the held item
                     Inventory inv = player.getInventory();
                     ItemStack item = player.getItemInHand();
+                    // Make sure the player is holding and item
                     if(item.getType() != Material.AIR){
+                        // Drop the item at the targeted location
                         inv.removeItem(item);
                         Location lookAt = player.getTargetBlock(null, 32).getLocation().add(0.5, 1.5, 0.5);
                         player.getWorld().dropItem(lookAt, item);
@@ -366,15 +377,17 @@ public final class ItemCondenser extends JavaPlugin{
              * TODO: Drop all items in a player's inventory
              */
             else if(commandLabel.equalsIgnoreCase("dropall")){
+                // Check permissions
                 if(player.hasPermission("ItemCondenser.Items.Drop.All")){
+                    // Get the player's inventory, and the contents thereof
                     Inventory inv = player.getInventory();
                     ItemStack[] items = inv.getContents();
+                    // Drop each item at the targeted location
                     for(ItemStack item : items){
                         if(item != null){
                             inv.removeItem(item);
-                            Location lookAt = player.getTargetBlock(null, 32).getLocation();
-                            Location dropAt = player.getWorld().getHighestBlockAt(lookAt).getLocation().add(0.5, 1.5, 0.5);
-                            player.getWorld().dropItem(dropAt, item);
+                            Location lookAt = player.getTargetBlock(null, 32).getLocation().add(0.5, 1.5, 0.5);
+                            player.getWorld().dropItem(lookAt, item);
                         }
                     }
                 }
@@ -387,7 +400,9 @@ public final class ItemCondenser extends JavaPlugin{
              * TODO: Sort the player's inventory
              */
             else if(commandLabel.equalsIgnoreCase("sort")){
+                // Check permissions
                 if(player.hasPermission("ItemCondenser.Sort")){
+                    // Get the player's inventory
                     Inventory inv = player.getInventory();
                     if(args.length >= 1){
                         if(args[0].equalsIgnoreCase("chest")){
@@ -705,7 +720,7 @@ public final class ItemCondenser extends JavaPlugin{
                             args[0] = args[0] + " " + args[i];
                         }
                         ItemStack item = player.getItemInHand();
-                        if(item != null){
+                        if(item.getType() != Material.AIR){
                             ItemMeta meta = item.getItemMeta();
                             if(args[0].equalsIgnoreCase("remove")){
                                 ItemStack refItem = new ItemStack(item.getType());
@@ -734,7 +749,7 @@ public final class ItemCondenser extends JavaPlugin{
                 if(player.hasPermission("ItemCondenser.Items.Lore")){
                     if(args.length >= 1){
                         ItemStack item = player.getItemInHand();
-                        if(item != null){
+                        if(item.getType() != Material.AIR){
                             ItemMeta meta = item.getItemMeta();
                             List<String> lore = meta.getLore();
                             if(lore == null){
@@ -770,7 +785,7 @@ public final class ItemCondenser extends JavaPlugin{
             else if(commandLabel.equalsIgnoreCase("moreitems")){
                 if(player.hasPermission("ItemCondenser.Items.More")){
                     ItemStack item = player.getItemInHand();
-                    if(item != null){
+                    if(item.getType() != Material.AIR){
                         item.setAmount(64);
                     }
                 }
