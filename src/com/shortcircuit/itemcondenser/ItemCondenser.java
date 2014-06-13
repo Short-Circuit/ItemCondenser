@@ -10,20 +10,25 @@ import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.block.BrewingStand;
 import org.bukkit.block.Chest;
+import org.bukkit.block.ContainerBlock;
+import org.bukkit.block.Furnace;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.yi.acru.bukkit.Lockette.Lockette;
-
+@SuppressWarnings("deprecation")
 public final class ItemCondenser extends JavaPlugin{
     public Logger logger = Bukkit.getLogger();
     public InventoryHandler inventory_handler;
     public File file;
+    public UtilityManager utility_manager;
     public boolean lockette = false;
     public void onEnable(){
         logger.info("[ItemCondenser] ItemCondenser by ShortCircuit908");
@@ -43,8 +48,25 @@ public final class ItemCondenser extends JavaPlugin{
         }
         catch(NoClassDefFoundError e){
         }
+        utility_manager = new UtilityManager();
     }
-    @SuppressWarnings("deprecation")
+    public void onDisable(){
+        for(Player player : Bukkit.getOnlinePlayers()){
+            if(utility_manager.hasUtility(player.getName())){
+                UtilityBlock utility = utility_manager.getUtility(player.getName());
+                Block block = utility.getBlock();
+                ContainerBlock container = (ContainerBlock)block.getState();
+                Inventory inv = container.getInventory();
+                for(ItemStack item : inv.getContents()){
+                    if(item != null){
+                        inv.remove(item);
+                        player.getInventory().addItem(item);
+                    }
+                }
+                utility_manager.removeUtility(player);
+            }
+        }
+    }
     public boolean onCommand(CommandSender sender, Command cmd, String commandLabel, String[] args){
         // Make sure the inventories are up-to-date
         inventory_handler.reloadInventories();
@@ -102,8 +124,6 @@ public final class ItemCondenser extends JavaPlugin{
             else if(commandLabel.equalsIgnoreCase("anvil")){
                 // Check permissions
                 if(player.hasPermission("ItemCondenser.Utility.Repair")){
-                    //Inventory anvilInv = Bukkit.createInventory(player, InventoryType.ANVIL);
-                    //player.openInventory(anvilInv);
                     player.sendMessage(ChatColor.RED + "This feature has not been implemented (WIP)");
                 }
                 else{
@@ -117,9 +137,24 @@ public final class ItemCondenser extends JavaPlugin{
             else if(commandLabel.equalsIgnoreCase("brew")){
                 // Check permissions
                 if(player.hasPermission("ItemCondenser.Utility.Brew")){
-                    //Inventory brewInv = Bukkit.createInventory(player, InventoryType.BREWING);
-                    //player.openInventory(brewInv);
-                    player.sendMessage(ChatColor.RED + "This feature has not been implemented (WIP)");
+                    if(utility_manager.hasUtility(player.getName())){
+                        UtilityBlock utility = utility_manager.getUtility(player.getName());
+                        if(utility.getUtilityType().equals(InventoryType.BREWING)){
+                            Block block = utility.getBlock();
+                            BrewingStand brew = (BrewingStand)block.getState();
+                            player.openInventory(brew.getInventory());
+                        }
+                        else{
+                            player.sendMessage(ChatColor.RED + "You already have a " + utility.getUtilityType() + " utility open");
+                        }
+                    }
+                    else{
+                        Block block = player.getWorld().getBlockAt(player.getLocation().getBlockX(), 1, player.getLocation().getBlockZ());
+                        utility_manager.addUtility(player.getName(), block, InventoryType.BREWING);
+                        block.setType(Material.BREWING_STAND);
+                        BrewingStand brew = (BrewingStand)block.getState();
+                        player.openInventory(brew.getInventory());
+                    }
                 }
                 else{
                     player.sendMessage(ChatColor.RED + "Insufficient permissions");
@@ -127,14 +162,29 @@ public final class ItemCondenser extends JavaPlugin{
                 return true;
             }
             /*
-             * TODO: Smelting (will crash the server)
+             * TODO: Smelting
              */
             else if(commandLabel.equalsIgnoreCase("smelt")){
                 // Check permissions
                 if(player.hasPermission("ItemCondenser.Utility.Smelt")){
-                    //Inventory smeltInv = Bukkit.createInventory(player, InventoryType.FURNACE);
-                    //player.openInventory(smeltInv);
-                    player.sendMessage(ChatColor.RED + "This feature has not been implemented (WIP)");
+                    if(utility_manager.hasUtility(player.getName())){
+                        UtilityBlock utility = utility_manager.getUtility(player.getName());
+                        if(utility.getUtilityType().equals(InventoryType.FURNACE)){
+                            Block block = utility.getBlock();
+                            Furnace furnace = (Furnace)block.getState();
+                            player.openInventory(furnace.getInventory());
+                        }
+                        else{
+                            player.sendMessage(ChatColor.RED + "You already have a " + utility.getUtilityType() + " utility open");
+                        }
+                    }
+                    else{
+                        Block block = player.getWorld().getBlockAt(player.getLocation().getBlockX(), 1, player.getLocation().getBlockZ());
+                        utility_manager.addUtility(player.getName(), block, InventoryType.FURNACE);
+                        block.setType(Material.FURNACE);
+                        Furnace furnace = (Furnace)block.getState();
+                        player.openInventory(furnace.getInventory());
+                    }
                 }
                 else{
                     player.sendMessage(ChatColor.RED + "Insufficient permissions");
@@ -796,5 +846,8 @@ public final class ItemCondenser extends JavaPlugin{
             logger.info("Cannot run this command from the console");
         }
         return false;
+    }
+    public UtilityManager getUtilityManager(){
+        return utility_manager;
     }
 }
