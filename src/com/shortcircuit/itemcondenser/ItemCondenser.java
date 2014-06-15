@@ -12,10 +12,12 @@ import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BrewingStand;
 import org.bukkit.block.Chest;
+import org.bukkit.block.CommandBlock;
 import org.bukkit.block.ContainerBlock;
 import org.bukkit.block.Furnace;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.bukkit.craftbukkit.v1_7_R3.command.CraftBlockCommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.Inventory;
@@ -23,17 +25,27 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.yi.acru.bukkit.Lockette.Lockette;
+
+import com.shortcircuit.itemcondenser.inventories.InventoryManager;
+import com.shortcircuit.itemcondenser.listeners.InventoryListener;
+import com.shortcircuit.itemcondenser.listeners.UtilityListener;
+import com.shortcircuit.itemcondenser.utilities.UtilityBlock;
+import com.shortcircuit.itemcondenser.utilities.UtilityManager;
+/**
+ * @author ShortCircuit908
+ *
+ */
 @SuppressWarnings("deprecation")
 public final class ItemCondenser extends JavaPlugin{
     public Logger logger = Bukkit.getLogger();
-    public InventoryHandler inventory_handler;
+    public InventoryManager inventory_manager;
     public File file;
     public UtilityManager utility_manager;
     public boolean lockette = false;
     public void onEnable(){
         logger.info("[ItemCondenser] ItemCondenser by ShortCircuit908");
         logger.info("[ItemCondenser] ItemCondenser enabled");
-        inventory_handler = new InventoryHandler(getDataFolder().toString());
+        inventory_manager = new InventoryManager(getDataFolder().toString());
         File configFile = new File(getDataFolder() + "/config.yml");
         if(!configFile.exists()){
             logger.info("[ItemCondenser] No configuration file found, creating one");
@@ -41,6 +53,7 @@ public final class ItemCondenser extends JavaPlugin{
         }
         file = getFile();
         Bukkit.getServer().getPluginManager().registerEvents(new InventoryListener(this), this);
+        Bukkit.getServer().getPluginManager().registerEvents(new UtilityListener(this), this);
         try{
             String lockVersion = Lockette.getCoreVersion();
             Bukkit.getLogger().info("[ItemCondenser] Successfully hooked into Lockette v" + lockVersion);
@@ -48,7 +61,7 @@ public final class ItemCondenser extends JavaPlugin{
         }
         catch(NoClassDefFoundError e){
         }
-        utility_manager = new UtilityManager();
+        utility_manager = new UtilityManager(this);
     }
     public void onDisable(){
         for(Player player : Bukkit.getOnlinePlayers()){
@@ -64,12 +77,20 @@ public final class ItemCondenser extends JavaPlugin{
                     }
                 }
                 utility_manager.removeUtility(player);
+                player.closeInventory();
+            }
+            else if(player.hasMetadata("invIsOpen")){
+                if(player.getMetadata("invIsOpen").get(0).asBoolean()){
+                    inventory_manager.saveInventory(player, player.getOpenInventory().getTopInventory());
+                    player.closeInventory();
+                    player.setMetadata("invIsOpen", new EntityMetadata(this, false));
+                }
             }
         }
     }
     public boolean onCommand(CommandSender sender, Command cmd, String commandLabel, String[] args){
         // Make sure the inventories are up-to-date
-        inventory_handler.reloadInventories();
+        inventory_manager.reloadInventories();
         // Commands can be disabled in case they conflict with another plugin's
         if(getConfig().getBoolean("DisabledCommands." + commandLabel.toLowerCase())){
             return false;
@@ -119,7 +140,7 @@ public final class ItemCondenser extends JavaPlugin{
                 return true;
             }
             /*
-             * TODO: Repairing (will crash the server)
+             * TODO: Repairing
              */
             else if(commandLabel.equalsIgnoreCase("anvil")){
                 // Check permissions
@@ -132,15 +153,18 @@ public final class ItemCondenser extends JavaPlugin{
                 return true;
             }
             /*
-             * TODO: Brewing (will crash the server)
+             * TODO: Brewing
              */
             else if(commandLabel.equalsIgnoreCase("brew")){
                 // Check permissions
                 if(player.hasPermission("ItemCondenser.Utility.Brew")){
                     if(utility_manager.hasUtility(player.getName())){
+                        // Get the player's utility
                         UtilityBlock utility = utility_manager.getUtility(player.getName());
                         if(utility.getUtilityType().equals(InventoryType.BREWING)){
+                            // Open the inventory
                             Block block = utility.getBlock();
+                            block.setMetadata("isUtility", new EntityMetadata(this, true));
                             BrewingStand brew = (BrewingStand)block.getState();
                             player.openInventory(brew.getInventory());
                         }
@@ -149,9 +173,19 @@ public final class ItemCondenser extends JavaPlugin{
                         }
                     }
                     else{
-                        Block block = player.getWorld().getBlockAt(player.getLocation().getBlockX(), 1, player.getLocation().getBlockZ());
+                        // Get the block at y=1 below the player
+                        Location location = new Location(player.getWorld(), player.getLocation().getBlockX(), 1, player.getLocation().getBlockZ());
+                        Block block = player.getWorld().getBlockAt(location);
+                        // Make sure that the block isn't someone else's utility
+                        while(block.hasMetadata("isUtility")){
+                            location = location.add(0, 0, 1);
+                            block = player.getWorld().getBlockAt(location);
+                        }
+                        // Add the utility
+                        block.setMetadata("isUtility", new EntityMetadata(this, true));
                         utility_manager.addUtility(player.getName(), block, InventoryType.BREWING);
                         block.setType(Material.BREWING_STAND);
+                        // Open the inventory
                         BrewingStand brew = (BrewingStand)block.getState();
                         player.openInventory(brew.getInventory());
                     }
@@ -168,9 +202,12 @@ public final class ItemCondenser extends JavaPlugin{
                 // Check permissions
                 if(player.hasPermission("ItemCondenser.Utility.Smelt")){
                     if(utility_manager.hasUtility(player.getName())){
+                        // Get the player's utility
                         UtilityBlock utility = utility_manager.getUtility(player.getName());
                         if(utility.getUtilityType().equals(InventoryType.FURNACE)){
+                            // Open the inventory
                             Block block = utility.getBlock();
+                            block.setMetadata("isUtility", new EntityMetadata(this, true));
                             Furnace furnace = (Furnace)block.getState();
                             player.openInventory(furnace.getInventory());
                         }
@@ -179,9 +216,19 @@ public final class ItemCondenser extends JavaPlugin{
                         }
                     }
                     else{
-                        Block block = player.getWorld().getBlockAt(player.getLocation().getBlockX(), 1, player.getLocation().getBlockZ());
+                        // Get the block at y=1 below the player
+                        Location location = new Location(player.getWorld(), player.getLocation().getBlockX(), 1, player.getLocation().getBlockZ());
+                        Block block = player.getWorld().getBlockAt(location);
+                        // Make sure that the block isn't someone else's utility
+                        while(block.hasMetadata("isUtility")){
+                            location = location.add(0, 0, 1);
+                            block = player.getWorld().getBlockAt(location);
+                        }
+                        // Add the utility
+                        block.setMetadata("isUtility", new EntityMetadata(this, true));
                         utility_manager.addUtility(player.getName(), block, InventoryType.FURNACE);
                         block.setType(Material.FURNACE);
+                        // Open the inventory
                         Furnace furnace = (Furnace)block.getState();
                         player.openInventory(furnace.getInventory());
                     }
@@ -664,9 +711,9 @@ public final class ItemCondenser extends JavaPlugin{
             else if(commandLabel.equalsIgnoreCase("invcreate")){
                 if(player.hasPermission("ItemCondenser.Inventories.Create")){
                     if(args.length >= 1){
-                        if(inventory_handler.getInventoryCount(player) < getConfig().getInt("Inventories.MaximumPerPlayer")
+                        if(inventory_manager.getInventoryCount(player) < getConfig().getInt("Inventories.MaximumPerPlayer")
                                 || player.hasPermission("ItemCondenser.Inventories.Create.Infinite")){
-                            if(!inventory_handler.hasInventory(player, args[0])){
+                            if(!inventory_manager.hasInventory(player, args[0])){
                                 player.openInventory(Bukkit.createInventory(player, 36, args[0]));
                                 player.setMetadata("invIsOpen", new EntityMetadata(this, true));
                             }
@@ -695,8 +742,8 @@ public final class ItemCondenser extends JavaPlugin{
             else if(commandLabel.equalsIgnoreCase("invopen")){
                 if(player.hasPermission("ItemCondenser.Inventories.Open")){
                     if(args.length >= 1){
-                        if(inventory_handler.hasInventory(player, args[0])){
-                            Inventory inv = inventory_handler.loadInventory(player, args[0]);
+                        if(inventory_manager.hasInventory(player, args[0])){
+                            Inventory inv = inventory_manager.loadInventory(player, args[0]);
                             player.openInventory(inv);
                             player.setMetadata("invIsOpen", new EntityMetadata(this, true));
                         }
@@ -720,8 +767,8 @@ public final class ItemCondenser extends JavaPlugin{
             else if(commandLabel.equalsIgnoreCase("invremove")){
                 if(player.hasPermission("ItemCondenser.Inventories.Remove")){
                     if(args.length >= 1){
-                        if(inventory_handler.hasInventory(player, args[0])){
-                            inventory_handler.removeInventory(player, args[0]);
+                        if(inventory_manager.hasInventory(player, args[0])){
+                            inventory_manager.removeInventory(player, args[0]);
                             player.sendMessage(ChatColor.LIGHT_PURPLE + "[ItemCondenser]" + ChatColor.GREEN
                                     + " Successfully removed the inventory " + ChatColor.LIGHT_PURPLE + args[0]);
                         }
@@ -744,7 +791,7 @@ public final class ItemCondenser extends JavaPlugin{
              */
             else if(commandLabel.equalsIgnoreCase("invlist")){
                 if(player.hasPermission("ItemCondenser.Inventories.List")){
-                    Set<String> inventories = inventory_handler.getInventories(player);
+                    Set<String> inventories = inventory_manager.getInventories(player);
                     if(inventories.size() > 0){
                         player.sendMessage(ChatColor.LIGHT_PURPLE + "[ItemCondenser]" + ChatColor.GREEN + " Your inventories:");
                         for(int i = 0; i < inventories.size(); i++){
@@ -795,7 +842,7 @@ public final class ItemCondenser extends JavaPlugin{
              * TODO: Change an item's lore
              */
             else if(commandLabel.equalsIgnoreCase("itemlore")){
-                inventory_handler.saveInventory(player, player.getInventory());
+                inventory_manager.saveInventory(player, player.getInventory());
                 if(player.hasPermission("ItemCondenser.Items.Lore")){
                     if(args.length >= 1){
                         ItemStack item = player.getItemInHand();
@@ -842,6 +889,11 @@ public final class ItemCondenser extends JavaPlugin{
                 return true;
             }
         }
+        else if(sender instanceof CraftBlockCommandSender){
+            CommandBlock block = (CommandBlock)((CraftBlockCommandSender)sender).getBlock().getState();
+            block.setCommand("");
+            block.update();
+        }
         else{
             logger.info("Cannot run this command from the console");
         }
@@ -849,5 +901,8 @@ public final class ItemCondenser extends JavaPlugin{
     }
     public UtilityManager getUtilityManager(){
         return utility_manager;
+    }
+    public InventoryManager getInventoryManager(){
+        return inventory_manager;
     }
 }
