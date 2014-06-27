@@ -37,11 +37,10 @@ import com.shortcircuit.itemcondenser.utilities.UtilityManager;
  */
 @SuppressWarnings("deprecation")
 public final class ItemCondenser extends JavaPlugin{
-    public Logger logger = Bukkit.getLogger();
-    public InventoryManager inventory_manager;
-    public File file;
-    public UtilityManager utility_manager;
-    public boolean lockette = false;
+    private Logger logger = Bukkit.getLogger();
+    private InventoryManager inventory_manager;
+    private UtilityManager utility_manager;
+    private boolean lockette = false;
     public void onEnable(){
         logger.info("[ItemCondenser] ItemCondenser by ShortCircuit908");
         logger.info("[ItemCondenser] ItemCondenser enabled");
@@ -51,7 +50,6 @@ public final class ItemCondenser extends JavaPlugin{
             logger.info("[ItemCondenser] No configuration file found, creating one");
             saveDefaultConfig();
         }
-        file = getFile();
         Bukkit.getServer().getPluginManager().registerEvents(new InventoryListener(this), this);
         Bukkit.getServer().getPluginManager().registerEvents(new UtilityListener(this), this);
         try{
@@ -799,7 +797,7 @@ public final class ItemCondenser extends JavaPlugin{
                         }
                     }
                     else{
-                        player.sendMessage(ChatColor.LIGHT_PURPLE + "[ItemCondenser]" + ChatColor.GREEN + " You do not have anu inventories");
+                        player.sendMessage(ChatColor.LIGHT_PURPLE + "[ItemCondenser]" + ChatColor.GREEN + " You do not have any inventories");
                     }
                 }
                 else{
