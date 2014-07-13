@@ -589,64 +589,153 @@ public final class ItemCondenser extends JavaPlugin{
                         }
                         return true;
                     }
-                    for(ItemStack item : inv.getContents()){
-                        if(item != null){
-                            inv.removeItem(item);
-                            inv.addItem(item);
+                    Inventory secondaryInv = Bukkit.createInventory(player, 36);
+                    for(Material material : Material.values()){
+                        for(ItemStack item : inv.getContents()){
+                            if(item != null){
+                                if(item.getType().equals(material)){
+                                    inv.removeItem(item);
+                                    secondaryInv.addItem(item);
+                                }
+                            }
                         }
                     }
-                    ItemStack[] items = inv.getContents();
+                    ItemStack[] items = secondaryInv.getContents();
+                    /*
                     Material[] itemReference = {Material.GOLD_NUGGET, Material.IRON_INGOT,
                             Material.DIAMOND, Material.COAL, Material.WHEAT, Material.REDSTONE,
                             Material.EMERALD, Material.GOLD_INGOT, Material.MELON,
                             Material.INK_SACK};
                     Material[] fourItemReference = {Material.GLOWSTONE_DUST, Material.CLAY_BALL,
                             Material.SNOW_BALL, Material.QUARTZ};
+                     */
                     for(ItemStack item : items){
-                        if(inv.firstEmpty() != -1){
+                        if(secondaryInv.firstEmpty() != -1){
                             if(item != null){
+                                int amount = item.getAmount();
+                                if(amount >= 9){
+                                    boolean condensed = false;
+                                    switch(item.getType()){
+                                    case GOLD_NUGGET:
+                                        secondaryInv.addItem(new ItemStack(Material.GOLD_INGOT, (int)item.getAmount() / 9));
+                                        condensed = true;
+                                        break;
+                                    case EMERALD:
+                                        secondaryInv.addItem(new ItemStack(Material.EMERALD_BLOCK, (int)item.getAmount() / 9));
+                                        condensed = true;
+                                        break;
+                                    case IRON_INGOT:
+                                        secondaryInv.addItem(new ItemStack(Material.IRON_BLOCK, (int)item.getAmount() / 9));
+                                        condensed = true;
+                                        break;
+                                    case COAL:
+                                        secondaryInv.addItem(new ItemStack(Material.COAL_BLOCK, (int)item.getAmount() / 9));
+                                        condensed = true;
+                                        break;
+                                    case DIAMOND:
+                                        secondaryInv.addItem(new ItemStack(Material.DIAMOND_BLOCK, (int)item.getAmount() / 9));
+                                        condensed = true;
+                                        break;
+                                    case WHEAT:
+                                        secondaryInv.addItem(new ItemStack(Material.HAY_BLOCK, (int)item.getAmount() / 9));
+                                        condensed = true;
+                                        break;
+                                    case REDSTONE:
+                                        secondaryInv.addItem(new ItemStack(Material.REDSTONE_BLOCK, (int)item.getAmount() / 9));
+                                        condensed = true;
+                                        break;
+                                    case GOLD_INGOT:
+                                        secondaryInv.addItem(new ItemStack(Material.GOLD_BLOCK, (int)item.getAmount() / 9));
+                                        condensed = true;
+                                        break;
+                                    case INK_SACK:
+                                        if(item.getDurability() == (short) 4) {
+                                            secondaryInv.addItem(new ItemStack(Material.LAPIS_BLOCK, (int)item.getAmount() / 9));
+                                            condensed = true;
+                                            break;
+                                        }
+                                    default:
+                                        break;
+                                    }
+                                    if(condensed){
+                                        if(amount == 9 || amount % 9 == 0){
+                                            secondaryInv.removeItem(item);
+                                        }
+                                        else{
+                                            item.setAmount(amount % 9);
+                                        }
+                                    }
+                                }
+                                else if(amount >= 4){
+                                    boolean condensed = false;
+                                    switch(item.getType()){
+                                    case CLAY_BALL:
+                                        secondaryInv.addItem(new ItemStack(Material.CLAY, (int)item.getAmount() / 4));
+                                        condensed = true;
+                                        break;
+                                    case SNOW_BALL:
+                                        secondaryInv.addItem(new ItemStack(Material.SNOW_BLOCK, (int)item.getAmount() / 4));
+                                        condensed = true;
+                                        break;
+                                    case GLOWSTONE_DUST:
+                                        secondaryInv.addItem(new ItemStack(Material.GLOWSTONE, (int)item.getAmount() / 4));
+                                        condensed = true;
+                                        break;
+                                    default:
+                                        break;
+                                    }
+                                    if(condensed){
+                                        if(amount == 4 || amount % 9 == 0){
+                                            secondaryInv.removeItem(item);
+                                        }
+                                        else{
+                                            item.setAmount(amount % 9);
+                                        }
+                                    }
+                                }
+                                /*
                                 int amount = item.getAmount();
                                 for(Material reference : itemReference){
                                     if(item.getType().equals(reference)){
                                         if(amount >= 9){
                                             switch(item.getType()) {
                                             case GOLD_NUGGET:
-                                                inv.addItem(new ItemStack(Material.GOLD_INGOT, (int)item.getAmount() / 9));
+                                                secondaryInv.addItem(new ItemStack(Material.GOLD_INGOT, (int)item.getAmount() / 9));
                                                 break;
                                             case EMERALD:
-                                                inv.addItem(new ItemStack(Material.EMERALD_BLOCK, (int)item.getAmount() / 9));
+                                                secondaryInv.addItem(new ItemStack(Material.EMERALD_BLOCK, (int)item.getAmount() / 9));
                                                 break;
                                             case IRON_INGOT:
-                                                inv.addItem(new ItemStack(Material.IRON_BLOCK, (int)item.getAmount() / 9));
+                                                secondaryInv.addItem(new ItemStack(Material.IRON_BLOCK, (int)item.getAmount() / 9));
                                                 break;
                                             case COAL:
-                                                inv.addItem(new ItemStack(Material.COAL_BLOCK, (int)item.getAmount() / 9));
+                                                secondaryInv.addItem(new ItemStack(Material.COAL_BLOCK, (int)item.getAmount() / 9));
                                                 break;
                                             case DIAMOND:
-                                                inv.addItem(new ItemStack(Material.DIAMOND_BLOCK, (int)item.getAmount() / 9));
+                                                secondaryInv.addItem(new ItemStack(Material.DIAMOND_BLOCK, (int)item.getAmount() / 9));
                                                 break;
                                             case WHEAT:
-                                                inv.addItem(new ItemStack(Material.HAY_BLOCK, (int)item.getAmount() / 9));
+                                                secondaryInv.addItem(new ItemStack(Material.HAY_BLOCK, (int)item.getAmount() / 9));
                                                 break;
                                             case REDSTONE:
-                                                inv.addItem(new ItemStack(Material.REDSTONE_BLOCK, (int)item.getAmount() / 9));
+                                                secondaryInv.addItem(new ItemStack(Material.REDSTONE_BLOCK, (int)item.getAmount() / 9));
                                                 break;
                                             case GOLD_INGOT:
-                                                inv.addItem(new ItemStack(Material.GOLD_BLOCK, (int)item.getAmount() / 9));
+                                                secondaryInv.addItem(new ItemStack(Material.GOLD_BLOCK, (int)item.getAmount() / 9));
                                                 break;
                                             case MELON:
-                                                inv.addItem(new ItemStack(Material.MELON_BLOCK, (int)item.getAmount() / 9));
+                                                secondaryInv.addItem(new ItemStack(Material.MELON_BLOCK, (int)item.getAmount() / 9));
                                                 break;
                                             case INK_SACK:
                                                 if(item.getDurability() == (short) 4) {
-                                                    inv.addItem(new ItemStack(Material.LAPIS_BLOCK, (int)item.getAmount() / 9));
+                                                    secondaryInv.addItem(new ItemStack(Material.LAPIS_BLOCK, (int)item.getAmount() / 9));
                                                 }
                                                 break;
                                             default:
                                                 break;
                                             }
                                             if(amount == 9){
-                                                inv.removeItem(item);
+                                                secondaryInv.removeItem(item);
                                             }
                                             else{
                                                 item.setAmount(amount % 9);
@@ -659,24 +748,24 @@ public final class ItemCondenser extends JavaPlugin{
                                         if(amount >= 4){
                                             switch(item.getType()){
                                             case CLAY_BALL:
-                                                inv.addItem(new ItemStack(Material.CLAY, (int)item.getAmount() / 4));
+                                                secondaryInv.addItem(new ItemStack(Material.CLAY, (int)item.getAmount() / 4));
                                                 break;
                                             case SNOW_BALL:
-                                                inv.addItem(new ItemStack(Material.SNOW_BLOCK, (int)item.getAmount() / 4));
+                                                secondaryInv.addItem(new ItemStack(Material.SNOW_BLOCK, (int)item.getAmount() / 4));
                                                 break;
                                             case GLOWSTONE_DUST:
-                                                inv.addItem(new ItemStack(Material.GLOWSTONE, (int)item.getAmount() / 4));
+                                                secondaryInv.addItem(new ItemStack(Material.GLOWSTONE, (int)item.getAmount() / 4));
                                                 break;
                                                 /*
                                             case QUARTZ:
                                                 inv.addItem(new ItemStack(Material.QUARTZ_BLOCK, (int)item.getAmount() / 4));
                                                 break;
-                                                 */
+
                                             default:
                                                 break;
                                             }
                                             if(amount == 4){
-                                                inv.removeItem(item);
+                                                secondaryInv.removeItem(item);
                                             }
                                             else{
                                                 item.setAmount(amount % 4);
@@ -684,6 +773,7 @@ public final class ItemCondenser extends JavaPlugin{
                                         }
                                     }
                                 }
+                                 */
                             }
                         }
                         else{
@@ -691,10 +781,14 @@ public final class ItemCondenser extends JavaPlugin{
                             break;
                         }
                     }
-                    for(ItemStack item : inv.getContents()){
-                        if(item != null){
-                            inv.removeItem(item);
-                            inv.addItem(item);
+                    for(Material material : Material.values()){
+                        for(ItemStack item : secondaryInv.getContents()){
+                            if(item != null){
+                                if(item.getType().equals(material)){
+                                    secondaryInv.removeItem(item);
+                                    inv.addItem(item);
+                                }
+                            }
                         }
                     }
                 }
