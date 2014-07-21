@@ -43,7 +43,12 @@ public class InventoryManager{
      * TODO: Check how many additional inventories a player has
      */
     public int getInventoryCount(Player player){
-        return inventory_file.getConfigurationSection("Inventories." + player.getName()).getKeys(false).size();
+        try{
+            return inventory_file.getConfigurationSection("Inventories." + player.getName()).getKeys(false).size();
+        }
+        catch(NullPointerException e){
+            return 0;
+        }
     }
     /*
      * TODO: Remove a player's additional inventory
