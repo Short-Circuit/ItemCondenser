@@ -33,8 +33,13 @@ public class InventoryListener implements Listener{
         Player player = (Player)event.getPlayer();
         Inventory inventory = event.getInventory();
         if(player.hasMetadata("invIsOpen")){
-            if(player.getMetadata("invIsOpen").get(0).asBoolean()){
-                main.getInventoryManager().saveInventory(player, inventory);
+            try {
+                if(player.getMetadata("invIsOpen").get(0).asBoolean()){
+                    main.getInventoryHandler().saveInventory(player, inventory);
+                }
+            }
+            catch(IndexOutOfBoundsException e) {
+
             }
         }
         player.setMetadata("invIsOpen", new EntityMetadata(main, false));

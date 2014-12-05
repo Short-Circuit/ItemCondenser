@@ -6,6 +6,7 @@ import org.bukkit.block.ContainerBlock;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -72,7 +73,7 @@ public class UtilityListener implements Listener{
     }
     @EventHandler
     public void cancelUtilityUse(final PlayerInteractEvent event){
-        if(event.getClickedBlock() != null){
+        if(event.getClickedBlock() != null && event.getAction().equals(Action.RIGHT_CLICK_BLOCK)){
             if(event.getClickedBlock().hasMetadata("isUtility")){
                 event.getPlayer().sendMessage(ChatColor.RED + "[ItemCondenser] You cannot use a utility block!");
                 event.setCancelled(true);
