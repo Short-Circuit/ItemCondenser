@@ -1,15 +1,5 @@
 package com.shortcircuit.itemcondenser.commands;
 
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Material;
-import org.bukkit.block.Block;
-import org.bukkit.block.Chest;
-import org.bukkit.entity.Player;
-import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.ItemStack;
-import org.yi.acru.bukkit.Lockette.Lockette;
-
 import com.shortcircuit.itemcondenser.ItemCondenser;
 import com.shortcircuit.shortcommands.command.CommandType;
 import com.shortcircuit.shortcommands.command.CommandWrapper;
@@ -22,9 +12,19 @@ import com.shortcircuit.shortcommands.exceptions.PlayerOnlyException;
 import com.shortcircuit.shortcommands.exceptions.TooFewArgumentsException;
 import com.shortcircuit.shortcommands.exceptions.TooManyArgumentsException;
 
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.Material;
+import org.bukkit.block.Block;
+import org.bukkit.block.Chest;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
+import org.yi.acru.bukkit.Lockette.Lockette;
+
 /**
  * @author ShortCircuit908
- * 
+ *
  */
 public class CondenseCommand extends ShortCommand{
 	private ItemCondenser plugin;
@@ -32,29 +32,29 @@ public class CondenseCommand extends ShortCommand{
 		super(owning_plugin);
 		this.plugin = owning_plugin;
 	}
-	
+
 	@Override
 	public CommandType getCommandType() {
 		return CommandType.PLAYER;
 	}
-	
+
 	@Override
 	public String[] getCommandNames() {
 		return new String[] {"condense"};
 	}
-	
+
 	@Override
 	public String getPermissions() {
 		return "itemcondenser.condense";
 	}
-	
+
 	@Override
 	public String[] getHelp() {
 		return new String[] {
 				ChatColor.GREEN + "Condenses all materials in the inventory into blocks",
 				ChatColor.GREEN + "/${condense}"};
 	}
-	
+
 	@SuppressWarnings("deprecation")
 	@Override
 	public String[] exec(CommandWrapper command)
@@ -105,47 +105,47 @@ public class CondenseCommand extends ShortCommand{
 		}
 		ItemStack[] items = secondaryInv.getContents();
 		for(ItemStack item : items){
-			if(secondaryInv.firstEmpty() != -1){
+			if(inv.firstEmpty() != -1){
 				if(item != null){
 					int amount = item.getAmount();
 					if(amount >= 9){
 						boolean condensed = false;
 						switch(item.getType()){
 						case GOLD_NUGGET:
-							secondaryInv.addItem(new ItemStack(Material.GOLD_INGOT, (int)item.getAmount() / 9));
+							inv.addItem(new ItemStack(Material.GOLD_INGOT, (int)item.getAmount() / 9));
 							condensed = true;
 							break;
 						case EMERALD:
-							secondaryInv.addItem(new ItemStack(Material.EMERALD_BLOCK, (int)item.getAmount() / 9));
+							inv.addItem(new ItemStack(Material.EMERALD_BLOCK, (int)item.getAmount() / 9));
 							condensed = true;
 							break;
 						case IRON_INGOT:
-							secondaryInv.addItem(new ItemStack(Material.IRON_BLOCK, (int)item.getAmount() / 9));
+							inv.addItem(new ItemStack(Material.IRON_BLOCK, (int)item.getAmount() / 9));
 							condensed = true;
 							break;
 						case COAL:
-							secondaryInv.addItem(new ItemStack(Material.COAL_BLOCK, (int)item.getAmount() / 9));
+							inv.addItem(new ItemStack(Material.COAL_BLOCK, (int)item.getAmount() / 9));
 							condensed = true;
 							break;
 						case DIAMOND:
-							secondaryInv.addItem(new ItemStack(Material.DIAMOND_BLOCK, (int)item.getAmount() / 9));
+							inv.addItem(new ItemStack(Material.DIAMOND_BLOCK, (int)item.getAmount() / 9));
 							condensed = true;
 							break;
 						case WHEAT:
-							secondaryInv.addItem(new ItemStack(Material.HAY_BLOCK, (int)item.getAmount() / 9));
+							inv.addItem(new ItemStack(Material.HAY_BLOCK, (int)item.getAmount() / 9));
 							condensed = true;
 							break;
 						case REDSTONE:
-							secondaryInv.addItem(new ItemStack(Material.REDSTONE_BLOCK, (int)item.getAmount() / 9));
+							inv.addItem(new ItemStack(Material.REDSTONE_BLOCK, (int)item.getAmount() / 9));
 							condensed = true;
 							break;
 						case GOLD_INGOT:
-							secondaryInv.addItem(new ItemStack(Material.GOLD_BLOCK, (int)item.getAmount() / 9));
+							inv.addItem(new ItemStack(Material.GOLD_BLOCK, (int)item.getAmount() / 9));
 							condensed = true;
 							break;
 						case INK_SACK:
 							if(item.getDurability() == (short) 4) {
-								secondaryInv.addItem(new ItemStack(Material.LAPIS_BLOCK, (int)item.getAmount() / 9));
+								inv.addItem(new ItemStack(Material.LAPIS_BLOCK, (int)item.getAmount() / 9));
 								condensed = true;
 								break;
 							}
@@ -165,15 +165,15 @@ public class CondenseCommand extends ShortCommand{
 						boolean condensed = false;
 						switch(item.getType()){
 						case CLAY_BALL:
-							secondaryInv.addItem(new ItemStack(Material.CLAY, (int)item.getAmount() / 4));
+							inv.addItem(new ItemStack(Material.CLAY, (int)item.getAmount() / 4));
 							condensed = true;
 							break;
 						case SNOW_BALL:
-							secondaryInv.addItem(new ItemStack(Material.SNOW_BLOCK, (int)item.getAmount() / 4));
+							inv.addItem(new ItemStack(Material.SNOW_BLOCK, (int)item.getAmount() / 4));
 							condensed = true;
 							break;
 						case GLOWSTONE_DUST:
-							secondaryInv.addItem(new ItemStack(Material.GLOWSTONE, (int)item.getAmount() / 4));
+							inv.addItem(new ItemStack(Material.GLOWSTONE, (int)item.getAmount() / 4));
 							condensed = true;
 							break;
 						default:
@@ -207,7 +207,7 @@ public class CondenseCommand extends ShortCommand{
 		}
 		return new String[] {};
 	}
-	
+
 	@Override
 	public boolean canBeDisabled() {
 		return true;

@@ -1,16 +1,4 @@
 package com.shortcircuit.itemcondenser;
-import java.io.File;
-import java.util.logging.Logger;
-
-import org.bukkit.Bukkit;
-import org.bukkit.block.Block;
-import org.bukkit.block.ContainerBlock;
-import org.bukkit.entity.Player;
-import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.plugin.java.JavaPlugin;
-import org.yi.acru.bukkit.Lockette.Lockette;
-
 import com.shortcircuit.itemcondenser.commands.BrewCommand;
 import com.shortcircuit.itemcondenser.commands.ClearCommand;
 import com.shortcircuit.itemcondenser.commands.CondenseCommand;
@@ -42,6 +30,18 @@ import com.shortcircuit.shortcommands.ShortCommands;
 import com.shortcircuit.shortcommands.command.ShortCommand;
 import com.shortcircuit.shortcommands.command.ShortCommandHandler;
 import com.sk89q.worldedit.WorldEdit;
+
+import org.bukkit.Bukkit;
+import org.bukkit.block.Block;
+import org.bukkit.block.ContainerBlock;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.plugin.java.JavaPlugin;
+import org.yi.acru.bukkit.Lockette.Lockette;
+
+import java.io.File;
+import java.util.logging.Logger;
 /**
  * @author ShortCircuit908
  *
@@ -55,13 +55,26 @@ public final class ItemCondenser extends JavaPlugin{
 	private ShortCommandHandler<ShortCommand> command_handler;
 	public void onEnable(){
 		logger.info("ItemCondenser by ShortCircuit908");
-		if(!getServer().getPluginManager().isPluginEnabled("ShortCommands")){
+		utility_manager = new UtilityManager(this);
+		try {
+			inventory_handler = new InventoryHandler(this);
+		}
+		catch(NoClassDefFoundError e) {
+			logger.severe("Could not load GSON library");
+			logger.severe("I dunno how to fix this");
+			logger.severe("I mean, this SHOULD be a Maven dependency");
+			logger.severe("But Maven has always disliked me");
+			logger.severe("Apparently, it's just an Eclipse thing");
+			logger.severe("I'll just use IDEA then, I guess");
+			setEnabled(false);
+			return;
+		}
+		if(getServer().getPluginManager().getPlugin("ShortCommands") == null){
 			logger.severe("This plugin requires the ShortCommands command system to operate");
 			logger.severe("Please install the plugin from http://dev.bukkit.org/bukkit-plugins/ShortCommands/");
 			setEnabled(false);
 			return;
 		}
-		inventory_handler = new InventoryHandler(this);
 		File configFile = new File(getDataFolder() + "/config.yml");
 		if(!configFile.exists()){
 			logger.info("No configuration file found, creating one");
@@ -69,14 +82,11 @@ public final class ItemCondenser extends JavaPlugin{
 		}
 		getServer().getPluginManager().registerEvents(new InventoryListener(this), this);
 		getServer().getPluginManager().registerEvents(new UtilityListener(this), this);
-		try{
+		if(getServer().getPluginManager().isPluginEnabled("Lockette")) {
 			String lockVersion = Lockette.getCoreVersion();
 			logger.info("Successfully hooked into Lockette v" + lockVersion);
 			lockette = true;
 		}
-		catch(NoClassDefFoundError e){
-		}
-		utility_manager = new UtilityManager(this);
 		if(Bukkit.getPluginManager().isPluginEnabled("WorldEdit")) {
 			try {
 				WorldEdit.getInstance().getEventBus().register(new WorldEditHandler(this));

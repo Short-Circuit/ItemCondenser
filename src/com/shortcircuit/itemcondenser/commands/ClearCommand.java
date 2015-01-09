@@ -1,13 +1,5 @@
 package com.shortcircuit.itemcondenser.commands;
 
-import org.bukkit.ChatColor;
-import org.bukkit.Material;
-import org.bukkit.block.Block;
-import org.bukkit.block.Chest;
-import org.bukkit.entity.Player;
-import org.bukkit.inventory.Inventory;
-import org.yi.acru.bukkit.Lockette.Lockette;
-
 import com.shortcircuit.itemcondenser.ItemCondenser;
 import com.shortcircuit.shortcommands.command.CommandType;
 import com.shortcircuit.shortcommands.command.CommandWrapper;
@@ -20,9 +12,17 @@ import com.shortcircuit.shortcommands.exceptions.PlayerOnlyException;
 import com.shortcircuit.shortcommands.exceptions.TooFewArgumentsException;
 import com.shortcircuit.shortcommands.exceptions.TooManyArgumentsException;
 
+import org.bukkit.ChatColor;
+import org.bukkit.Material;
+import org.bukkit.block.Block;
+import org.bukkit.block.Chest;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
+import org.yi.acru.bukkit.Lockette.Lockette;
+
 /**
  * @author ShortCircuit908
- * 
+ *
  */
 public class ClearCommand extends ShortCommand{
 	private ItemCondenser plugin;
@@ -30,29 +30,29 @@ public class ClearCommand extends ShortCommand{
 		super(owning_plugin);
 		this.plugin = owning_plugin;
 	}
-	
+
 	@Override
 	public CommandType getCommandType() {
 		return CommandType.PLAYER;
 	}
-	
+
 	@Override
 	public String[] getCommandNames() {
 		return new String[] {"clear", "clearinventory", "ci"};
 	}
-	
+
 	@Override
 	public String getPermissions() {
 		return "itemcondenser.clear";
 	}
-	
+
 	@Override
 	public String[] getHelp() {
 		return new String[] {
 				ChatColor.GREEN + "Clears the inventory",
 				ChatColor.GREEN + "/${command}"};
 	}
-	
+
 	@SuppressWarnings("deprecation")
 	@Override
 	public String[] exec(CommandWrapper command)
@@ -66,15 +66,15 @@ public class ClearCommand extends ShortCommand{
 			if(command.getArg(0).equalsIgnoreCase("chest")){
 				// Get the targeted block
 				Block block = player.getTargetBlock(null, 5);
-				boolean isPrivate = false;
+				boolean is_private = false;
 				// If Lockette is installed, check if the block is protected
 				if(plugin.usingLockette()){
-					isPrivate = Lockette.isProtected(block);
+					is_private = Lockette.isProtected(block);
 				}
 				// Check if the targeted block is a chest
 				if(block.getType().equals(Material.CHEST) || block.getType().equals(Material.TRAPPED_CHEST)){
 					// If the chest is private, check if the player is an allowed user
-					if(isPrivate){
+					if(is_private){
 						if(!Lockette.isOwner(block, player.getName()) && !Lockette.isUser(block, player.getName(), true)
 								&& !Lockette.isEveryone(block)){
 							// If the player is not an allowed user, tell them to GTFO
@@ -101,7 +101,7 @@ public class ClearCommand extends ShortCommand{
 		inv.clear();
 		return new String[] {ChatColor.GREEN + "Inventory cleared"};
 	}
-	
+
 	@Override
 	public boolean canBeDisabled() {
 		return true;
