@@ -1,5 +1,20 @@
 package com.shortcircuit.itemcondenser.configuration;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParseException;
+import com.google.gson.JsonParser;
+import com.google.gson.reflect.TypeToken;
+import com.shortcircuit.itemcondenser.ItemCondenser;
+import com.shortcircuit.itemcondenser.inventories.ItemWrapper;
+
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -11,25 +26,12 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.entity.Player;
-import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.ItemStack;
-
-import com.google.gson.Gson;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonParseException;
-import com.google.gson.JsonParser;
-import com.google.gson.reflect.TypeToken;
-import com.shortcircuit.itemcondenser.ItemCondenser;
-import com.shortcircuit.itemcondenser.inventories.ItemWrapper;
-
 /**
  * @author ShortCircuit908
  *
  */
 public class InventoryHandler {
+	private final Gson gson = new GsonBuilder().serializeNulls().setPrettyPrinting().create();
 	private File player_dir;
 
 	public InventoryHandler(ItemCondenser plugin) {
@@ -117,17 +119,15 @@ public class InventoryHandler {
 	}
 
 	public JsonElement getJsonElement(Map<String, ItemWrapper[]> inventories) {
-		Gson gson = new Gson();
 		return gson.toJsonTree(inventories);
 	}
 
 	private Map<String, ItemWrapper[]> getJsonInventories(JsonElement element){
 		try {
 			Type type = new TypeToken<Map<String, ItemWrapper[]>>(){}.getType();
-			Gson gson = new Gson();
 			Map<String, ItemWrapper[]> inventories = gson.fromJson(element, type);
 			if(inventories == null){
-				inventories = new HashMap<String, ItemWrapper[]>();
+				inventories = new HashMap<>();
 			}
 			return inventories;
 		}
@@ -135,6 +135,6 @@ public class InventoryHandler {
 			Bukkit.getConsoleSender().sendMessage(ChatColor.RED + "[ItemCondenser] Unable to parse element: "
 					+ e.getMessage());
 		}
-		return new HashMap<String, ItemWrapper[]>();
+		return new HashMap<>();
 	}
 }

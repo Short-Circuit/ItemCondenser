@@ -89,7 +89,7 @@ public class SortCommand extends ShortCommand{
 				}
 			}
 			else{
-				throw new InvalidArgumentException(command.getArg(0));
+				throw new InvalidArgumentException(command.getCommandLabel(), command.getArg(0));
 			}
 		}
 		Inventory new_inv = Bukkit.createInventory(player, 54);

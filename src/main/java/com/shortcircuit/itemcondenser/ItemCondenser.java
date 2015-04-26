@@ -1,25 +1,6 @@
 package com.shortcircuit.itemcondenser;
-import com.shortcircuit.itemcondenser.commands.BrewCommand;
-import com.shortcircuit.itemcondenser.commands.ClearCommand;
-import com.shortcircuit.itemcondenser.commands.CondenseCommand;
-import com.shortcircuit.itemcondenser.commands.CraftCommand;
-import com.shortcircuit.itemcondenser.commands.DropCommand;
-import com.shortcircuit.itemcondenser.commands.DropallCommand;
-import com.shortcircuit.itemcondenser.commands.EnchantCommand;
-import com.shortcircuit.itemcondenser.commands.EnderchestCommand;
-import com.shortcircuit.itemcondenser.commands.InvcreateCommand;
-import com.shortcircuit.itemcondenser.commands.InvlistCommand;
-import com.shortcircuit.itemcondenser.commands.InvopenCommand;
-import com.shortcircuit.itemcondenser.commands.InvremoveCommand;
-import com.shortcircuit.itemcondenser.commands.ItemloreCommand;
-import com.shortcircuit.itemcondenser.commands.ItemnameCommand;
-import com.shortcircuit.itemcondenser.commands.MoreitemsCommand;
-import com.shortcircuit.itemcondenser.commands.RepairCommand;
-import com.shortcircuit.itemcondenser.commands.SmeltCommand;
-import com.shortcircuit.itemcondenser.commands.SortCommand;
-import com.shortcircuit.itemcondenser.commands.StoreCommand;
-import com.shortcircuit.itemcondenser.commands.StoreallCommand;
-import com.shortcircuit.itemcondenser.commands.TrashCommand;
+
+import com.shortcircuit.itemcondenser.commands.*;
 import com.shortcircuit.itemcondenser.configuration.InventoryHandler;
 import com.shortcircuit.itemcondenser.listeners.InventoryListener;
 import com.shortcircuit.itemcondenser.listeners.UtilityListener;
@@ -38,10 +19,10 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.yi.acru.bukkit.Lockette.Lockette;
 
 import java.io.File;
 import java.util.logging.Logger;
+
 /**
  * @author ShortCircuit908
  *
@@ -75,7 +56,7 @@ public final class ItemCondenser extends JavaPlugin{
 			setEnabled(false);
 			return;
 		}
-		File configFile = new File(getDataFolder() + "/config.yml");
+		File configFile = new File(getDataFolder() + "/main/config.yml");
 		if(!configFile.exists()){
 			logger.info("No configuration file found, creating one");
 			saveDefaultConfig();

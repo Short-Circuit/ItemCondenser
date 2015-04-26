@@ -4,3 +4,4 @@ author: ShortCircuit908
 website: http://dev.bukkit.org/bukkit-plugins/itemcondenser/
 main: com.shortcircuit.itemcondenser.ItemCondenser
 description: Inventory management tool
+depend: [ShortCommands]

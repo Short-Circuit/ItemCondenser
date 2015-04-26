@@ -94,7 +94,7 @@ public class ClearCommand extends ShortCommand{
 				}
 			}
 			else{
-				throw new InvalidArgumentException(command.getArg(0));
+				throw new InvalidArgumentException(command.getCommandLabel(), command.getArg(0));
 			}
 		}
 		// Clear the inventory
