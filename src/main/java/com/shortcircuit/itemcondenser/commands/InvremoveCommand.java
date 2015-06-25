@@ -1,7 +1,8 @@
 package com.shortcircuit.itemcondenser.commands;
 
 import com.shortcircuit.itemcondenser.ItemCondenser;
-import com.shortcircuit.itemcondenser.configuration.InventoryHandler;
+import com.shortcircuit.itemcondenser.inventories.InventoryManager;
+import com.shortcircuit.itemcondenser.inventories.MultiInventory;
 import com.shortcircuit.shortcommands.command.CommandType;
 import com.shortcircuit.shortcommands.command.CommandWrapper;
 import com.shortcircuit.shortcommands.command.ShortCommand;
@@ -21,10 +22,10 @@ import org.bukkit.entity.Player;
  *
  */
 public class InvremoveCommand extends ShortCommand{
-	private InventoryHandler inventory_manager;
+	private InventoryManager inventory_manager;
 	public InvremoveCommand(ItemCondenser owning_plugin) {
 		super(owning_plugin);
-		this.inventory_manager = owning_plugin.getInventoryHandler();
+		this.inventory_manager = owning_plugin.getInventoryManager();
 	}
 
 	@Override
@@ -58,8 +59,10 @@ public class InvremoveCommand extends ShortCommand{
 			throw new TooFewArgumentsException(command.getCommandLabel());
 		}
 		Player player = (Player)command.getSender();
-		if(inventory_manager.hasInventory(player, command.getArg(0))){
-			inventory_manager.removeInventory(player, command.getArg(0));
+		if(inventory_manager.hasInventory(player.getUniqueId(), command.getArg(0))){
+			MultiInventory inventories = inventory_manager.getInventories(player.getUniqueId());
+			inventories.removeInventory(command.getArg(0));
+			inventory_manager.saveInventories(inventories);
 			return new String[] {ChatColor.LIGHT_PURPLE + "[ItemCondenser]" + ChatColor.GREEN
 					+ " Successfully removed the inventory " + ChatColor.LIGHT_PURPLE + command.getArg(0)};
 		}

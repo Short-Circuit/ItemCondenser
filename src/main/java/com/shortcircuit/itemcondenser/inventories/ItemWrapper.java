@@ -5,6 +5,7 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -43,5 +44,43 @@ public class ItemWrapper{
 		}
 		item.setItemMeta(meta);
 		return item;
+	}
+
+	public static ItemStack[] convertArray(ItemWrapper[] array){
+		if(array == null){
+			return null;
+		}
+		ItemStack[] converted = new ItemStack[array.length];
+		for(int i = 0; i < array.length; i++){
+			converted[i] = array[i] == null ? null : array[i].toItemStack();
+		}
+		return converted;
+	}
+
+	public static ItemWrapper[] convertArray(ItemStack[] array){
+		if(array == null){
+			return null;
+		}
+		ItemWrapper[] converted = new ItemWrapper[array.length];
+		for(int i = 0; i < array.length; i++){
+			converted[i] = array[i] == null ? null : new ItemWrapper(array[i]);
+		}
+		return converted;
+	}
+
+	public static ArrayList<ItemStack> convertWrapperList(List<ItemWrapper> list){
+		ArrayList<ItemStack> converted = new ArrayList<>(list.size());
+		for(ItemWrapper wrapper : list){
+			converted.add(wrapper == null ? null : wrapper.toItemStack());
+		}
+		return converted;
+	}
+
+	public static ArrayList<ItemWrapper> convertStackList(List<ItemStack> list){
+		ArrayList<ItemWrapper> converted = new ArrayList<>(list.size());
+		for(ItemStack item : list){
+			converted.add(item == null ? null : new ItemWrapper(item));
+		}
+		return converted;
 	}
 }

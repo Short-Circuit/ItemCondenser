@@ -1,8 +1,7 @@
 package com.shortcircuit.itemcondenser.commands;
 
-import com.shortcircuit.itemcondenser.EntityMetadata;
 import com.shortcircuit.itemcondenser.ItemCondenser;
-import com.shortcircuit.itemcondenser.configuration.InventoryHandler;
+import com.shortcircuit.itemcondenser.inventories.InventoryManager;
 import com.shortcircuit.shortcommands.command.CommandType;
 import com.shortcircuit.shortcommands.command.CommandWrapper;
 import com.shortcircuit.shortcommands.command.ShortCommand;
@@ -20,15 +19,15 @@ import org.bukkit.inventory.Inventory;
 
 /**
  * @author ShortCircuit908
- *
  */
-public class InvopenCommand extends ShortCommand{
+public class InvopenCommand extends ShortCommand {
 	private ItemCondenser plugin;
-	private InventoryHandler inventory_manager;
+	private InventoryManager inventory_manager;
+
 	public InvopenCommand(ItemCondenser owning_plugin) {
 		super(owning_plugin);
 		this.plugin = owning_plugin;
-		this.inventory_manager = owning_plugin.getInventoryHandler();
+		this.inventory_manager = owning_plugin.getInventoryManager();
 	}
 
 	@Override
@@ -38,7 +37,7 @@ public class InvopenCommand extends ShortCommand{
 
 	@Override
 	public String[] getCommandNames() {
-		return new String[] {"invopen"};
+		return new String[]{"invopen"};
 	}
 
 	@Override
@@ -48,7 +47,7 @@ public class InvopenCommand extends ShortCommand{
 
 	@Override
 	public String[] getHelp() {
-		return new String[] {
+		return new String[]{
 				ChatColor.GREEN + "Opens an additional inventory",
 				ChatColor.GREEN + "/${command} <InventoryName>"};
 	}
@@ -58,20 +57,19 @@ public class InvopenCommand extends ShortCommand{
 			throws TooFewArgumentsException, TooManyArgumentsException,
 			InvalidArgumentException, NoPermissionException,
 			PlayerOnlyException, ConsoleOnlyException, BlockOnlyException {
-		if(command.getArgs().length < 1) {
+		if (command.getArgs().length < 1) {
 			throw new TooFewArgumentsException(command.getCommandLabel());
 		}
-		Player player = (Player)command.getSender();
-		if(inventory_manager.hasInventory(player, command.getArg(0))){
+		Player player = (Player) command.getSender();
+		if (inventory_manager.hasInventory(player.getUniqueId(), command.getArg(0))) {
 			Inventory inv = inventory_manager.loadInventory(player, command.getArg(0));
 			player.openInventory(inv);
-			player.setMetadata("invIsOpen", new EntityMetadata(plugin, true));
 		}
-		else{
-			return new String[] {ChatColor.LIGHT_PURPLE + "[ItemCondenser]" + ChatColor.GREEN
+		else {
+			return new String[]{ChatColor.LIGHT_PURPLE + "[ItemCondenser]" + ChatColor.GREEN
 					+ " You do not have an inventory named " + ChatColor.LIGHT_PURPLE + command.getArg(0)};
 		}
-		return new String[] {};
+		return new String[]{};
 	}
 
 	@Override

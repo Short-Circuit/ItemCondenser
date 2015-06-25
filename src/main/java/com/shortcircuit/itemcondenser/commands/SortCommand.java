@@ -1,6 +1,7 @@
 package com.shortcircuit.itemcondenser.commands;
 
 import com.shortcircuit.itemcondenser.ItemCondenser;
+import com.shortcircuit.itemcondenser.utils.Utils;
 import com.shortcircuit.shortcommands.command.CommandType;
 import com.shortcircuit.shortcommands.command.CommandWrapper;
 import com.shortcircuit.shortcommands.command.ShortCommand;
@@ -12,15 +13,12 @@ import com.shortcircuit.shortcommands.exceptions.PlayerOnlyException;
 import com.shortcircuit.shortcommands.exceptions.TooFewArgumentsException;
 import com.shortcircuit.shortcommands.exceptions.TooManyArgumentsException;
 
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.Material;
-import org.bukkit.block.Block;
-import org.bukkit.block.Chest;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.yi.acru.bukkit.Lockette.Lockette;
+
+import java.util.ArrayList;
 
 /**
  * @author ShortCircuit908
@@ -62,52 +60,20 @@ public class SortCommand extends ShortCommand{
 			InvalidArgumentException, NoPermissionException,
 			PlayerOnlyException, ConsoleOnlyException, BlockOnlyException {
 		Player player = (Player)command.getSender();
-		// Get the player's inventory
-		Inventory inv = player.getInventory();
-		if(command.getArgs().length >= 1){
-			if(command.getArg(0).equalsIgnoreCase("chest")){
-				Block block = player.getTargetBlock(null, 5);
-				boolean is_private = false;
-				if(plugin.usingLockette()){
-					is_private = Lockette.isProtected(block);
-				}
-				if(block.getType().equals(Material.CHEST) || block.getType().equals(Material.TRAPPED_CHEST)){
-					if(is_private){
-						if(!Lockette.isOwner(block, player.getName()) && !Lockette.isUser(block, player.getName(), true)
-								&& !Lockette.isEveryone(block)){
-							return new String[] {ChatColor.RED + "That chest is private!"};
-						}
-					}
-					Chest chest = (Chest)block.getState();
-					inv = chest.getInventory();
-				}
-				else if(block.getType().equals(Material.ENDER_CHEST)){
-					inv = player.getEnderChest();
-				}
-				else{
-					return new String[] {ChatColor.RED + "No chest to sort"};
-				}
-			}
-			else{
-				throw new InvalidArgumentException(command.getCommandLabel(), command.getArg(0));
+		Inventory inventory = Utils.getTargetInventory(player, 5);
+		if(inventory == null){
+			inventory = player.getInventory();
+		}
+		ArrayList<ItemStack> contents = new ArrayList<>(inventory.getSize());
+		for(ItemStack item : inventory.getContents()){
+			if(item != null) {
+				contents.add(item);
 			}
 		}
-		Inventory new_inv = Bukkit.createInventory(player, 54);
-		for(Material material : Material.values()){
-			for(ItemStack item : inv.getContents()){
-				if(item != null){
-					if(item.getType().equals(material)){
-						inv.removeItem(item);
-						new_inv.addItem(item);
-					}
-				}
-			}
-		}
-		for(ItemStack item : new_inv.getContents()){
-			if(item != null){
-				new_inv.removeItem(item);
-				inv.addItem(item);
-			}
+		inventory.clear();
+		Utils.sortItems(contents);
+		for(ItemStack item : contents){
+			inventory.addItem(item);
 		}
 		return new String[] {ChatColor.GREEN + "Inventory sorted"};
 	}

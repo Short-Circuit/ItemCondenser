@@ -1,18 +1,6 @@
 package com.shortcircuit.itemcondenser.commands;
 
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.block.Block;
-import org.bukkit.block.BrewingStand;
-import org.bukkit.entity.Player;
-import org.bukkit.event.inventory.InventoryType;
-import org.bukkit.inventory.Inventory;
-
-import com.shortcircuit.itemcondenser.EntityMetadata;
 import com.shortcircuit.itemcondenser.ItemCondenser;
-import com.shortcircuit.itemcondenser.utilities.UtilityBlock;
 import com.shortcircuit.itemcondenser.utilities.UtilityManager;
 import com.shortcircuit.shortcommands.command.CommandType;
 import com.shortcircuit.shortcommands.command.CommandWrapper;
@@ -25,19 +13,21 @@ import com.shortcircuit.shortcommands.exceptions.PlayerOnlyException;
 import com.shortcircuit.shortcommands.exceptions.TooFewArgumentsException;
 import com.shortcircuit.shortcommands.exceptions.TooManyArgumentsException;
 
+import org.bukkit.ChatColor;
+
 /**
  * @author ShortCircuit908
- * 
  */
-public class RepairCommand extends ShortCommand{
+public class RepairCommand extends ShortCommand {
 	private ItemCondenser plugin;
 	private UtilityManager utility_manager;
+
 	public RepairCommand(ItemCondenser owning_plugin) {
 		super(owning_plugin);
 		this.plugin = owning_plugin;
 		this.utility_manager = owning_plugin.getUtilityManager();
 	}
-	
+
 	@Override
 	public CommandType getCommandType() {
 		return CommandType.PLAYER;
@@ -45,7 +35,7 @@ public class RepairCommand extends ShortCommand{
 
 	@Override
 	public String[] getCommandNames() {
-		return new String[] {"repair", "anvil"};
+		return new String[]{"repair", "anvil"};
 	}
 
 	@Override
@@ -55,7 +45,7 @@ public class RepairCommand extends ShortCommand{
 
 	@Override
 	public String[] getHelp() {
-		return new String[] {
+		return new String[]{
 				ChatColor.GREEN + "Opens a portable anvil",
 				ChatColor.GREEN + "/${command}"};
 	}
@@ -65,48 +55,9 @@ public class RepairCommand extends ShortCommand{
 			throws TooFewArgumentsException, TooManyArgumentsException,
 			InvalidArgumentException, NoPermissionException,
 			PlayerOnlyException, ConsoleOnlyException, BlockOnlyException {
-		Player player = (Player)command.getSender();
-		if(utility_manager.hasUtility(player.getName())){
-			// Get the player's utility
-			UtilityBlock utility = utility_manager.getUtility(player.getName());
-			if(utility.getUtilityType().equals(InventoryType.ANVIL)){
-				// Open the inventory
-				Block block = utility.getBlock();
-				block.setMetadata("isUtility", new EntityMetadata(plugin, true));
-				BrewingStand brew = (BrewingStand)block.getState();
-				player.openInventory(brew.getInventory());
-			}
-			else{
-				return new String[] {ChatColor.RED + "You already have a " + utility.getUtilityType()
-						+ " utility open"};
-			}
-		}
-		else{
-			// Get the block at y=1 below the player
-			Location location = new Location(player.getWorld(), player.getLocation().getBlockX(), 1,
-					player.getLocation().getBlockZ());
-			Block block = player.getWorld().getBlockAt(location);
-			// Make sure that the block isn't someone else's utility
-			while(block.hasMetadata("isUtility")){
-				location = location.add(0, 0, 1);
-				block = player.getWorld().getBlockAt(location);
-			}
-			// Add the utility
-			block.setMetadata("isUtility", new EntityMetadata(plugin, true));
-			utility_manager.addUtility(player.getName(), block, InventoryType.ANVIL);
-			block.setType(Material.ANVIL);
-			// Open the inventory
-			/*
-			InventoryHolder anvil = (InventoryHolder)block.getState();
-			player.openInventory(anvil.getInventory());
-			*/
-			//Bukkit.createInventory(block.getState(), InventoryType.ANVIL, "Repair");
-			Inventory inv = Bukkit.createInventory(player, 9, "Not implemented");
-			player.openInventory(inv);
-		}
-		return new String[] {};
+		return new String[]{ChatColor.RED + "This command has not been implemented"};
 	}
-	
+
 	@Override
 	public boolean canBeDisabled() {
 		return true;

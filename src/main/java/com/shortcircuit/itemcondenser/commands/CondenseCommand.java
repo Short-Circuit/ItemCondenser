@@ -1,33 +1,28 @@
 package com.shortcircuit.itemcondenser.commands;
 
 import com.shortcircuit.itemcondenser.ItemCondenser;
+import com.shortcircuit.itemcondenser.utils.Utils;
 import com.shortcircuit.shortcommands.command.CommandType;
 import com.shortcircuit.shortcommands.command.CommandWrapper;
 import com.shortcircuit.shortcommands.command.ShortCommand;
-import com.shortcircuit.shortcommands.exceptions.BlockOnlyException;
-import com.shortcircuit.shortcommands.exceptions.ConsoleOnlyException;
-import com.shortcircuit.shortcommands.exceptions.InvalidArgumentException;
-import com.shortcircuit.shortcommands.exceptions.NoPermissionException;
 import com.shortcircuit.shortcommands.exceptions.PlayerOnlyException;
-import com.shortcircuit.shortcommands.exceptions.TooFewArgumentsException;
-import com.shortcircuit.shortcommands.exceptions.TooManyArgumentsException;
-
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
-import org.bukkit.block.Block;
-import org.bukkit.block.Chest;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.yi.acru.bukkit.Lockette.Lockette;
+import org.bukkit.util.Vector;
+
+import java.util.ArrayList;
+import java.util.Iterator;
 
 /**
  * @author ShortCircuit908
- *
  */
-public class CondenseCommand extends ShortCommand{
+public class CondenseCommand extends ShortCommand {
 	private ItemCondenser plugin;
+
 	public CondenseCommand(ItemCondenser owning_plugin) {
 		super(owning_plugin);
 		this.plugin = owning_plugin;
@@ -40,7 +35,7 @@ public class CondenseCommand extends ShortCommand{
 
 	@Override
 	public String[] getCommandNames() {
-		return new String[] {"condense"};
+		return new String[]{"condense"};
 	}
 
 	@Override
@@ -50,166 +45,176 @@ public class CondenseCommand extends ShortCommand{
 
 	@Override
 	public String[] getHelp() {
-		return new String[] {
+		return new String[]{
 				ChatColor.GREEN + "Condenses all materials in the inventory into blocks",
 				ChatColor.GREEN + "/${condense}"};
 	}
 
 	@SuppressWarnings("deprecation")
 	@Override
-	public String[] exec(CommandWrapper command)
-			throws TooFewArgumentsException, TooManyArgumentsException,
-			InvalidArgumentException, NoPermissionException,
-			PlayerOnlyException, ConsoleOnlyException, BlockOnlyException {
-		Player player = (Player)command.getSender();
-		Inventory inv = player.getInventory();
-		if(command.getArgs().length >= 1){
-			if(command.getArg(0).equalsIgnoreCase("chest")){
-				Block block = player.getTargetBlock(null, 5);
-				boolean isPrivate = false;
-				if(plugin.usingLockette()){
-					isPrivate = Lockette.isProtected(block);
-				}
-				if(block.getType().equals(Material.CHEST) || block.getType().equals(Material.TRAPPED_CHEST)){
-					if(isPrivate){
-						if(!Lockette.isOwner(block, player.getName()) && !Lockette.isUser(block,
-								player.getName(), true)){
-							return new String[] {ChatColor.RED + "That chest is private!"};
-						}
-					}
-					Chest chest = (Chest)block.getState();
-					inv = chest.getInventory();
-				}
-				else if(block.getType().equals(Material.ENDER_CHEST)){
-					inv = player.getEnderChest();
-				}
-				else{
-					return new String[] {ChatColor.RED + "No chest to condense"};
-				}
-			}
-			else{
-				throw new InvalidArgumentException(command.getCommandLabel(), command.getArg(0));
-			}
-			return new String[] {};
+	public String[] exec(CommandWrapper command) throws PlayerOnlyException {
+		if (!(command.getSender() instanceof Player)) {
+			throw new PlayerOnlyException();
 		}
-		Inventory secondaryInv = Bukkit.createInventory(player, 36);
-		for(Material material : Material.values()){
-			for(ItemStack item : inv.getContents()){
-				if(item != null){
-					if(item.getType().equals(material)){
-						inv.removeItem(item);
-						secondaryInv.addItem(item);
-					}
+		Player player = (Player) command.getSender();
+		Inventory inventory = Utils.getTargetInventory(player, 5);
+		if (inventory == null) {
+			inventory = player.getInventory();
+		}
+		ArrayList<ItemStack> contents = new ArrayList<>(inventory.getSize());
+		do{
+			for(ItemStack item : inventory.getContents()){
+				contents.add(item);
+			}
+			inventory.clear();
+			Utils.sortItems(contents);
+			for(ItemStack item : contents){
+				if(item != null) {
+					inventory.addItem(item);
 				}
 			}
+			contents.clear();
 		}
-		ItemStack[] items = secondaryInv.getContents();
-		for(ItemStack item : items){
-			if(inv.firstEmpty() != -1){
-				if(item != null){
-					int amount = item.getAmount();
-					if(amount >= 9){
-						boolean condensed = false;
-						switch(item.getType()){
-						case GOLD_NUGGET:
-							inv.addItem(new ItemStack(Material.GOLD_INGOT, (int)item.getAmount() / 9));
-							condensed = true;
-							break;
-						case EMERALD:
-							inv.addItem(new ItemStack(Material.EMERALD_BLOCK, (int)item.getAmount() / 9));
-							condensed = true;
-							break;
-						case IRON_INGOT:
-							inv.addItem(new ItemStack(Material.IRON_BLOCK, (int)item.getAmount() / 9));
-							condensed = true;
-							break;
-						case COAL:
-							inv.addItem(new ItemStack(Material.COAL_BLOCK, (int)item.getAmount() / 9));
-							condensed = true;
-							break;
-						case DIAMOND:
-							inv.addItem(new ItemStack(Material.DIAMOND_BLOCK, (int)item.getAmount() / 9));
-							condensed = true;
-							break;
-						case WHEAT:
-							inv.addItem(new ItemStack(Material.HAY_BLOCK, (int)item.getAmount() / 9));
-							condensed = true;
-							break;
-						case REDSTONE:
-							inv.addItem(new ItemStack(Material.REDSTONE_BLOCK, (int)item.getAmount() / 9));
-							condensed = true;
-							break;
-						case GOLD_INGOT:
-							inv.addItem(new ItemStack(Material.GOLD_BLOCK, (int)item.getAmount() / 9));
-							condensed = true;
-							break;
-						case INK_SACK:
-							if(item.getDurability() == (short) 4) {
-								inv.addItem(new ItemStack(Material.LAPIS_BLOCK, (int)item.getAmount() / 9));
-								condensed = true;
-								break;
-							}
-						default:
-							break;
-						}
-						if(condensed){
-							if(amount == 9 || amount % 9 == 0){
-								secondaryInv.removeItem(item);
-							}
-							else{
-								item.setAmount(amount % 9);
-							}
-						}
-					}
-					else if(amount >= 4){
-						boolean condensed = false;
-						switch(item.getType()){
-						case CLAY_BALL:
-							inv.addItem(new ItemStack(Material.CLAY, (int)item.getAmount() / 4));
-							condensed = true;
-							break;
-						case SNOW_BALL:
-							inv.addItem(new ItemStack(Material.SNOW_BLOCK, (int)item.getAmount() / 4));
-							condensed = true;
-							break;
-						case GLOWSTONE_DUST:
-							inv.addItem(new ItemStack(Material.GLOWSTONE, (int)item.getAmount() / 4));
-							condensed = true;
-							break;
-						default:
-							break;
-						}
-						if(condensed){
-							if(amount % 4 == 0 || amount % 4 == 0){
-								secondaryInv.removeItem(item);
-							}
-							else{
-								item.setAmount(amount % 4);
-							}
-						}
-					}
-				}
-			}
-			else{
-				return new String[] {ChatColor.LIGHT_PURPLE + "[ItemCondenser]" + ChatColor.GREEN
-						+ " Inventory is full!"};
-			}
-		}
-		for(Material material : Material.values()){
-			for(ItemStack item : secondaryInv.getContents()){
-				if(item != null){
-					if(item.getType().equals(material)){
-						secondaryInv.removeItem(item);
-						inv.addItem(item);
-					}
-				}
-			}
-		}
-		return new String[] {};
+		while (condenseInventory(player, inventory));
+		return new String[]{ChatColor.GREEN + "Inventory condensed"};
 	}
 
 	@Override
 	public boolean canBeDisabled() {
 		return true;
+	}
+
+	private double getConversionRate(Material type) {
+		switch (type) {
+			/*
+			case IRON_BLOCK:
+			case GOLD_BLOCK:
+			case DIAMOND_BLOCK:
+			case EMERALD_BLOCK:
+			case REDSTONE_BLOCK:
+			case COAL_BLOCK:
+				return 9;
+				*/
+			case IRON_INGOT:
+			case GOLD_INGOT:
+			case DIAMOND:
+			case EMERALD:
+			case REDSTONE:
+			case COAL:
+				return 1.0 / 9.0;
+			/*
+			case GLOWSTONE:
+			case CLAY:
+			case SNOW_BLOCK:
+				return 4;
+				*/
+			case GLOWSTONE_DUST:
+			case CLAY_BALL:
+			case SNOW_BALL:
+				return 0.25;
+			default:
+				return 1;
+		}
+	}
+
+	private Material getConversionType(Material type) {
+		switch (type) {
+			case IRON_INGOT:
+				return Material.IRON_BLOCK;
+			case GOLD_INGOT:
+				return Material.GOLD_BLOCK;
+			case DIAMOND:
+				return Material.DIAMOND_BLOCK;
+			case EMERALD:
+				return Material.EMERALD_BLOCK;
+			case REDSTONE:
+				return Material.REDSTONE_BLOCK;
+			case COAL:
+				return Material.COAL_BLOCK;
+			case GLOWSTONE_DUST:
+				return Material.GLOWSTONE;
+			case CLAY_BALL:
+				return Material.CLAY;
+			case SNOW_BALL:
+				return Material.SNOW_BLOCK;
+			/*
+			case IRON_BLOCK:
+				return Material.IRON_INGOT;
+			case GOLD_BLOCK:
+				return Material.GOLD_INGOT;
+			case DIAMOND_BLOCK:
+				return Material.DIAMOND;
+			case EMERALD_BLOCK:
+				return Material.EMERALD;
+			case REDSTONE_BLOCK:
+				return Material.REDSTONE;
+			case COAL_BLOCK:
+				return Material.COAL;
+			case GLOWSTONE:
+				return Material.GLOWSTONE_DUST;
+			case CLAY:
+				return Material.CLAY_BALL;
+			case SNOW_BLOCK:
+				return Material.SNOW_BALL;
+				*/
+			default:
+				return type;
+		}
+	}
+
+	private boolean hasRoomForItem(Inventory inventory, ItemStack item) {
+		int space_available = 0;
+		for (ItemStack compare : inventory.getContents()) {
+			if (item.isSimilar(compare)) {
+				space_available += (compare.getMaxStackSize() - compare.getAmount());
+			}
+		}
+		return space_available >= item.getAmount();
+	}
+
+	private boolean condenseInventory(Entity entity, Inventory inventory){
+		boolean condensed = false;
+		ArrayList<ItemStack> overflow = new ArrayList<>();
+		ArrayList<ItemStack> to_remove = new ArrayList<>(inventory.getSize());
+		for (ItemStack item : inventory.getContents()) {
+			if(item == null){
+				continue;
+			}
+			double conversion = getConversionRate(item.getType());
+			if(conversion == 1){
+				continue;
+			}
+			int amount = item.getAmount();
+			int new_item_amount = (int) (amount * conversion);
+			if(new_item_amount == 0){
+				continue;
+			}
+			condensed = true;
+			int old_item_amount = (int) (amount % (1.0 / conversion));
+			ItemStack new_item = new ItemStack(getConversionType(item.getType()), new_item_amount, item.getDurability());
+			new_item.setItemMeta(item.getItemMeta().clone());
+			overflow.addAll(inventory.addItem(new_item).values());
+			if (old_item_amount <= 0) {
+				to_remove.add(item);
+			}
+			else {
+				item.setAmount(old_item_amount);
+			}
+		}
+		for (ItemStack item : to_remove) {
+			inventory.removeItem(item);
+		}
+		Iterator<ItemStack> overflow_iter = overflow.iterator();
+		while (overflow_iter.hasNext()) {
+			ItemStack item = overflow_iter.next();
+			if (!hasRoomForItem(inventory, item)) {
+				entity.getWorld().dropItem(entity.getLocation(), item).setVelocity(new Vector(0, 0, 0));
+			}
+			else {
+				inventory.addItem(item);
+				overflow_iter.remove();
+			}
+		}
+		return condensed;
 	}
 }

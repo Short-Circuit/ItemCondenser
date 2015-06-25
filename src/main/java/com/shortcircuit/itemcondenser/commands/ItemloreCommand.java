@@ -71,7 +71,7 @@ public class ItemloreCommand extends ShortCommand{
 			}
 			else{
 				if(lore == null){
-					lore = new ArrayList<String>();
+					lore = new ArrayList<>();
 				}
 				String message = "";
 				for(String arg : command.getArgs()){

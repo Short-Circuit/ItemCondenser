@@ -1,12 +1,8 @@
 package com.shortcircuit.itemcondenser.commands;
 
-import java.util.Set;
-
-import org.bukkit.ChatColor;
-import org.bukkit.entity.Player;
-
 import com.shortcircuit.itemcondenser.ItemCondenser;
-import com.shortcircuit.itemcondenser.configuration.InventoryHandler;
+import com.shortcircuit.itemcondenser.inventories.InventoryManager;
+import com.shortcircuit.itemcondenser.inventories.MultiInventory;
 import com.shortcircuit.shortcommands.command.CommandType;
 import com.shortcircuit.shortcommands.command.CommandWrapper;
 import com.shortcircuit.shortcommands.command.ShortCommand;
@@ -18,15 +14,20 @@ import com.shortcircuit.shortcommands.exceptions.PlayerOnlyException;
 import com.shortcircuit.shortcommands.exceptions.TooFewArgumentsException;
 import com.shortcircuit.shortcommands.exceptions.TooManyArgumentsException;
 
+import org.bukkit.ChatColor;
+import org.bukkit.entity.Player;
+
+import java.util.ArrayList;
+
 /**
  * @author ShortCircuit908
  * 
  */
 public class InvlistCommand extends ShortCommand{
-	private InventoryHandler inventory_manager;
+	private InventoryManager inventory_manager;
 	public InvlistCommand(ItemCondenser owning_plugin) {
 		super(owning_plugin);
-		this.inventory_manager = owning_plugin.getInventoryHandler();
+		this.inventory_manager = owning_plugin.getInventoryManager();
 	}
 	
 	@Override
@@ -57,15 +58,14 @@ public class InvlistCommand extends ShortCommand{
 			InvalidArgumentException, NoPermissionException,
 			PlayerOnlyException, ConsoleOnlyException, BlockOnlyException {
 		Player player = (Player)command.getSender();
-		Set<String> inventories = inventory_manager.getInventories(player);
-		if(inventories.size() > 0){
-			String[] messages = new String[inventories.size() + 1];
-			messages[0] = ChatColor.LIGHT_PURPLE + "[ItemCondenser]" + ChatColor.GREEN + " Your inventories:";
-			for(int i = 0; i < inventories.size(); i++){
-				messages[i + 1] = ChatColor.LIGHT_PURPLE + "[" + (i + 1) + "] " + ChatColor.GREEN
-						+ inventories.toArray()[i];
+		MultiInventory inventories = inventory_manager.getInventories(player.getUniqueId());
+		if(inventories.getInventoryCount() > 0){
+			ArrayList<String> messages = new ArrayList<>(inventories.getInventoryCount() + 1);
+			messages.add(ChatColor.LIGHT_PURPLE + "[ItemCondenser]" + ChatColor.GREEN + " Your inventories:");
+			for(String name : inventories.listInventories()){
+				messages.add(ChatColor.GREEN + name);
 			}
-			return messages;
+			return messages.toArray(new String[0]);
 		}
 		else{
 			return new String[] {ChatColor.LIGHT_PURPLE + "[ItemCondenser]" + ChatColor.GREEN

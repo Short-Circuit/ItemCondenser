@@ -1,12 +1,7 @@
 package com.shortcircuit.itemcondenser.commands;
 
-import org.bukkit.ChatColor;
-import org.bukkit.Location;
-import org.bukkit.entity.Player;
-import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.ItemStack;
-
 import com.shortcircuit.itemcondenser.ItemCondenser;
+import com.shortcircuit.itemcondenser.utils.Utils;
 import com.shortcircuit.shortcommands.command.CommandType;
 import com.shortcircuit.shortcommands.command.CommandWrapper;
 import com.shortcircuit.shortcommands.command.ShortCommand;
@@ -17,6 +12,12 @@ import com.shortcircuit.shortcommands.exceptions.NoPermissionException;
 import com.shortcircuit.shortcommands.exceptions.PlayerOnlyException;
 import com.shortcircuit.shortcommands.exceptions.TooFewArgumentsException;
 import com.shortcircuit.shortcommands.exceptions.TooManyArgumentsException;
+
+import org.bukkit.ChatColor;
+import org.bukkit.Location;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
 
 /**
  * @author ShortCircuit908
@@ -56,13 +57,12 @@ public class DropallCommand extends ShortCommand{
 			InvalidArgumentException, NoPermissionException,
 			PlayerOnlyException, ConsoleOnlyException, BlockOnlyException {
 		Player player = (Player)command.getSender();
-		Inventory inv = player.getInventory();
-		ItemStack[] items = inv.getContents();
-		for(ItemStack item : items){
+		Inventory inventory = player.getInventory();
+		for(ItemStack item : inventory.getContents()){
 			if(item != null){
-				inv.removeItem(item);
-				Location lookAt = player.getTargetBlock(null, 32).getLocation().add(0.5, 1.5, 0.5);
-				player.getWorld().dropItem(lookAt, item);
+				inventory.removeItem(item);
+				Location target = player.getTargetBlock(Utils.TRANSPARENT_BLOCKS, 32).getLocation().add(0.5, 1.5, 0.5);
+				player.getWorld().dropItem(target, item);
 			}
 		}
 		return new String[] {};

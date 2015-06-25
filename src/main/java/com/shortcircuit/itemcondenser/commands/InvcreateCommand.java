@@ -1,14 +1,12 @@
 package com.shortcircuit.itemcondenser.commands;
 
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.entity.Player;
-
-import com.shortcircuit.itemcondenser.EntityMetadata;
 import com.shortcircuit.itemcondenser.ItemCondenser;
-import com.shortcircuit.itemcondenser.configuration.InventoryHandler;
+import com.shortcircuit.itemcondenser.inventories.InventoryManager;
+import com.shortcircuit.itemcondenser.inventories.ItemWrapper;
+import com.shortcircuit.itemcondenser.inventories.MultiInventory;
 import com.shortcircuit.shortcommands.command.CommandType;
 import com.shortcircuit.shortcommands.command.CommandWrapper;
+import com.shortcircuit.shortcommands.command.PermissionComparator;
 import com.shortcircuit.shortcommands.command.ShortCommand;
 import com.shortcircuit.shortcommands.exceptions.BlockOnlyException;
 import com.shortcircuit.shortcommands.exceptions.ConsoleOnlyException;
@@ -18,17 +16,20 @@ import com.shortcircuit.shortcommands.exceptions.PlayerOnlyException;
 import com.shortcircuit.shortcommands.exceptions.TooFewArgumentsException;
 import com.shortcircuit.shortcommands.exceptions.TooManyArgumentsException;
 
+import org.bukkit.ChatColor;
+import org.bukkit.entity.Player;
+
 /**
  * @author ShortCircuit908
- *
  */
-public class InvcreateCommand extends ShortCommand{
+public class InvcreateCommand extends ShortCommand {
 	private ItemCondenser plugin;
-	private InventoryHandler inventory_manager;
+	private InventoryManager inventory_manager;
+
 	public InvcreateCommand(ItemCondenser owning_plugin) {
 		super(owning_plugin);
 		this.plugin = owning_plugin;
-		this.inventory_manager = owning_plugin.getInventoryHandler();
+		this.inventory_manager = owning_plugin.getInventoryManager();
 	}
 
 	@Override
@@ -38,7 +39,7 @@ public class InvcreateCommand extends ShortCommand{
 
 	@Override
 	public String[] getCommandNames() {
-		return new String[] {"invcreate"};
+		return new String[]{"invcreate"};
 	}
 
 	@Override
@@ -48,7 +49,7 @@ public class InvcreateCommand extends ShortCommand{
 
 	@Override
 	public String[] getHelp() {
-		return new String[] {
+		return new String[]{
 				ChatColor.GREEN + "Creates an additional inventory",
 				ChatColor.GREEN + "/${command} <inventoryName>"};
 	}
@@ -58,26 +59,24 @@ public class InvcreateCommand extends ShortCommand{
 			throws TooFewArgumentsException, TooManyArgumentsException,
 			InvalidArgumentException, NoPermissionException,
 			PlayerOnlyException, ConsoleOnlyException, BlockOnlyException {
-		if(command.getArgs().length < 1) {
+		if (command.getArgs().length < 1) {
 			throw new TooFewArgumentsException(command.getCommandLabel());
 		}
-		Player player = (Player)command.getSender();
-		if(inventory_manager.getInventories(player).size() < plugin.getConfig().getInt("Inventories.MaximumPerPlayer")
-				|| player.hasPermission("itemcondenser.inventories.create.infinite")){
-			if(!inventory_manager.hasInventory(player, command.getArg(0))){
-				player.openInventory(Bukkit.createInventory(player, 36, command.getArg(0)));
-				player.setMetadata("invIsOpen", new EntityMetadata(plugin, true));
-			}
-			else{
-				return new String[] {ChatColor.LIGHT_PURPLE + "[ItemCondenser]" + ChatColor.GREEN
-						+ " You already have an inventory named " + ChatColor.LIGHT_PURPLE + command.getArg(0)};
-			}
+		Player player = (Player) command.getSender();
+		if(inventory_manager.hasInventory(player.getUniqueId(), command.getArg(0))) {
+			return new String[]{ChatColor.LIGHT_PURPLE + "[ItemCondenser]" + ChatColor.GREEN
+					+ " You already have an inventory named " + ChatColor.LIGHT_PURPLE + command.getArg(0)};
 		}
-		else{
-			return new String[] {ChatColor.LIGHT_PURPLE + "[ItemCondenser]" + ChatColor.GREEN
+		MultiInventory inventories = inventory_manager.getInventories(player.getUniqueId());
+		if(inventories.getInventoryCount() < plugin.getConfig().getInt("Inventories.MaximumPerPlayer")
+				&& !PermissionComparator.hasWildcardPermission(player, "itemcondenser.inventories.create.infinite")){
+			return new String[]{ChatColor.LIGHT_PURPLE + "[ItemCondenser]" + ChatColor.GREEN
 					+ " You have reached your maximum inventory count"};
 		}
-		return new String[] {};
+		inventories.createOrUpdateInventory(command.getArg(0), new ItemWrapper[36]);
+		inventory_manager.saveInventories(inventories);
+		player.openInventory(inventory_manager.loadInventory(player, command.getArg(0)));
+		return new String[]{};
 	}
 
 	@Override
